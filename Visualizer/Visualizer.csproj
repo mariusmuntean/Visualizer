@@ -9,10 +9,12 @@
 
     <ItemGroup>
         <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
+        <PackageReference Include="TweetinviAPI" Version="5.0.4" />
     </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\Visualizer.Model\Visualizer.Model.csproj" />
+      <ProjectReference Include="..\Visualizer.Services\Visualizer.Services.csproj" />
     </ItemGroup>
 
 </Project>

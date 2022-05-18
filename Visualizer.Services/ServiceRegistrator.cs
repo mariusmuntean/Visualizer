@@ -1,11 +1,11 @@
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Visualizer.Model;
+namespace Visualizer.Services;
 
 public static class ServiceRegistrator
 {
     public static void Register(IServiceCollection serviceCollection)
     {
-        
+        serviceCollection.AddScoped<TweetBatchDownloadService>();
     }
 }

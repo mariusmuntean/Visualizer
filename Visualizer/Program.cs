@@ -1,3 +1,6 @@
+using Mapster;
+using Redis.OM.Modeling;
+using Tweetinvi.Core.Models;
 using Visualizer.Extensions;
 using Visualizer.HostedServices;
 using Visualizer.Model;
@@ -35,6 +38,16 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+// Config Mapster
+TypeAdapterConfig<DateTimeOffset, DateTime>.NewConfig()
+    .MapWith(offset => offset.DateTime)
+    ;
+TypeAdapterConfig<Tweet, TweetModel>.NewConfig()
+    .Map(dest => dest.Id, src => src.Id)
+    // .Map(dest => dest.CreatedAt, src => src.CreatedAt.DateTime)
+    .Map(dest => dest.GeoLoc, src => new GeoLoc(src.Coordinates.Latitude, src.Coordinates.Longitude))
+    ;
 
 app.UseHttpsRedirection();
 

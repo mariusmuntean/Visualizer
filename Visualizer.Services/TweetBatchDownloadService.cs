@@ -1,5 +1,8 @@
-﻿using Redis.OM;
+﻿using Mapster;
+using Redis.OM;
 using Tweetinvi;
+using Tweetinvi.Models;
+using Tweetinvi.Parameters.V2;
 using Visualizer.Model;
 
 namespace Visualizer.Services;
@@ -21,20 +24,14 @@ public class TweetBatchDownloadService
 
         var tweetCollection = _redisConnectionProvider.RedisCollection<TweetModel>();
 
-        var sampleStreamV2 = _twitterClient.StreamsV2.CreateSampleStream();
-        sampleStreamV2.TweetReceived += async (sender, args) =>
+        var filteredStream = _twitterClient.StreamsV2.CreateSampleStream();
+        filteredStream.TweetReceived += async (sender, args) =>
         {
             try
             {
                 currentAmount++;
-                Console.WriteLine(args.Tweet.Text);
-                var internalId = await tweetCollection.InsertAsync(new TweetModel()
-                {
-                    Id = args.Tweet.Id,
-                    AuthorId = args.Tweet.AuthorId,
-                    CreatedAt = args.Tweet.CreatedAt.DateTime,
-                    Text = args.Tweet.Text
-                });
+                var tweetModel = args.Tweet.Adapt<TweetModel>();
+                var internalId = await tweetCollection.InsertAsync(tweetModel);
                 Console.WriteLine(internalId);
             }
             catch (Exception ex)
@@ -45,11 +42,11 @@ public class TweetBatchDownloadService
             {
                 if (currentAmount >= amount)
                 {
-                    sampleStreamV2.StopStream();
+                    filteredStream.StopStream();
                 }
             }
         };
 
-        await sampleStreamV2.StartAsync();
+        await filteredStream.StartAsync();
     }
 }

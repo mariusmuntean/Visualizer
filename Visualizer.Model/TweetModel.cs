@@ -20,4 +20,7 @@ public class TweetModel
 
     [Indexed]
     public DateTime CreatedAt { get; set; }
+
+    [Indexed]
+    public GeoLoc? GeoLoc { get; set; }
 }

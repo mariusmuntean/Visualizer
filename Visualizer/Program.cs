@@ -1,4 +1,8 @@
+using Visualizer.HostedServices;
+using Visualizer.Model;
+
 var builder = WebApplication.CreateBuilder(args);
+builder.Configuration.AddJsonFile("appsettings.local.json", true, true);
 
 // Add services to the container.
 
@@ -6,6 +10,12 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// Add services for the Model project
+ServiceRegistrator.Register(builder.Services);
+
+// Add hosted services
+builder.Services.AddHostedService<IndexInitializer>();
 
 var app = builder.Build();
 

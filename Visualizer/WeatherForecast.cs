@@ -1,4 +1,4 @@
-namespace Vizualiser;
+namespace Visualizer;
 
 public class WeatherForecast
 {

@@ -11,11 +11,13 @@ public class TweetBatchDownloadService
 {
     private readonly TwitterClient _twitterClient;
     private readonly RedisConnectionProvider _redisConnectionProvider;
+    private readonly TweetGraphService _tweetGraphService;
 
-    public TweetBatchDownloadService(TwitterClient twitterClient, RedisConnectionProvider redisConnectionProvider)
+    public TweetBatchDownloadService(TwitterClient twitterClient, RedisConnectionProvider redisConnectionProvider, TweetGraphService tweetGraphService)
     {
         _twitterClient = twitterClient;
         _redisConnectionProvider = redisConnectionProvider;
+        _tweetGraphService = tweetGraphService;
     }
 
     public async Task BatchDownloadTweets(int amount = 10)
@@ -32,6 +34,7 @@ public class TweetBatchDownloadService
                 currentAmount++;
                 var tweetModel = args.Tweet.Adapt<TweetModel>();
                 var internalId = await tweetCollection.InsertAsync(tweetModel);
+                await _tweetGraphService.AddTweet(args);
                 Console.WriteLine(internalId);
             }
             catch (Exception ex)

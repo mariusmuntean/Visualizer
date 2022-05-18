@@ -9,6 +9,7 @@
 
     <ItemGroup>
         <PackageReference Include="Mapster" Version="7.3.0" />
+        <PackageReference Include="NRedisGraph" Version="1.6.0" />
         <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
         <PackageReference Include="TweetinviAPI" Version="5.0.4" />
     </ItemGroup>

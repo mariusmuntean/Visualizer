@@ -1,4 +1,6 @@
+using NRedisGraph;
 using Redis.OM;
+using StackExchange.Redis;
 using Tweetinvi;
 using Tweetinvi.Models;
 
@@ -26,5 +28,15 @@ public static class WebApplicationBuilderExtensions
         var connectionString = webApplicationBuilder.Configuration.GetSection("Redis")["ConnectionString"]
                                ?? throw new Exception("Cannot read Redis connection string");
         webApplicationBuilder.Services.AddSingleton(new RedisConnectionProvider(connectionString));
+    }
+
+    public static void AddRedisGraph(this WebApplicationBuilder webApplicationBuilder)
+    {
+        var muxer = ConnectionMultiplexer.Connect("localhost");
+        var db = muxer.GetDatabase();
+        var graph = new RedisGraph(db);
+
+        webApplicationBuilder.Services.AddSingleton(db);
+        webApplicationBuilder.Services.AddSingleton(graph);
     }
 }

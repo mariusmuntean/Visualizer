@@ -22,6 +22,8 @@ public class TwitterStreamService
 
     public async Task ProcessSampleStream(int amount = 10)
     {
+        await _tweetHashtagService.GetTopHashtags(10);
+
         var currentAmount = 0;
         var stopped = false;
 
@@ -64,6 +66,7 @@ public class TwitterStreamService
     public void StopSampledStream()
     {
         _sampleStream?.StopStream();
+        Console.WriteLine("Stopped streaming");
     }
 
     public async Task ProcessFilteredStream(int amount = 10)

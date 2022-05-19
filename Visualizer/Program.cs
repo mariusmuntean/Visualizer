@@ -1,7 +1,11 @@
+using GraphQL.Server.Ui.Altair;
+using GraphQL.Server.Ui.Voyager;
+using GraphQL.Types;
 using Mapster;
 using Redis.OM.Modeling;
 using Tweetinvi.Core.Models;
 using Visualizer.Extensions;
+using Visualizer.GraphQl;
 using Visualizer.HostedServices;
 using Visualizer.Model;
 
@@ -9,6 +13,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddJsonFile("appsettings.local.json", true, true);
 
 // Add services to the container.
+
+// Add GraphQL
+builder.AddVisualizerGraphQl();
 
 // Add TwitterClient
 builder.AddTwitterClient();
@@ -53,6 +60,28 @@ TypeAdapterConfig<Tweet, TweetModel>.NewConfig()
     // .Map(dest => dest.CreatedAt, src => src.CreatedAt.DateTime)
     .Map(dest => dest.GeoLoc, src => new GeoLoc(src.Coordinates.Latitude, src.Coordinates.Longitude))
     ;
+
+// GraphQL
+app.UseWebSockets();
+app.UseGraphQL<VisualizerSchema>();
+app.UseGraphQLWebSockets<VisualizerSchema>();
+
+app.UseGraphQLAltair(new AltairOptions
+{
+    // Headers = new Dictionary<string, string>
+    // {
+    //     ["X-api-token"] = "130fh9823bd023hd892d0j238dh",
+    // }
+});
+
+app.UseGraphQLVoyager(new VoyagerOptions
+{
+    Headers = new Dictionary<string, object>
+    {
+        ["MyHeader1"] = "MyValue",
+        ["MyHeader2"] = 42,
+    },
+});
 
 app.UseHttpsRedirection();
 

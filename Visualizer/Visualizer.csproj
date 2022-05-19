@@ -8,6 +8,11 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="GraphQL.DataLoader" Version="5.3.0" />
+        <PackageReference Include="GraphQL.MicrosoftDI" Version="5.3.0" />
+        <PackageReference Include="GraphQL.Server.All" Version="6.1.0" />
+        <PackageReference Include="GraphQL.Server.Core" Version="4.4.1" />
+        <PackageReference Include="GraphQL.SystemTextJson" Version="5.3.0" />
         <PackageReference Include="Mapster" Version="7.3.0" />
         <PackageReference Include="NRedisGraph" Version="1.6.0" />
         <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
@@ -15,8 +20,8 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Visualizer.Model\Visualizer.Model.csproj" />
-      <ProjectReference Include="..\Visualizer.Services\Visualizer.Services.csproj" />
+        <ProjectReference Include="..\Visualizer.Model\Visualizer.Model.csproj" />
+        <ProjectReference Include="..\Visualizer.Services\Visualizer.Services.csproj" />
     </ItemGroup>
 
 </Project>

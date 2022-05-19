@@ -38,4 +38,10 @@ public class TweetHashtagService
             await Console.Error.WriteLineAsync($"Failed to add/increment {hashtag} in the sorted set {HASHTAGS}. {ex.StackTrace}");
         }
     }
+
+    public async Task<SortedSetEntry[]> GetTopHashtags(int amount = 10)
+    {
+        var range = await _database.SortedSetRangeByRankWithScoresAsync(new RedisKey(HASHTAGS), 0, amount, Order.Descending);
+        return range;
+    }
 }

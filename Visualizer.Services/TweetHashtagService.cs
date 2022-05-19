@@ -15,7 +15,7 @@ public class TweetHashtagService
 
     public async Task AddHashtags(TweetV2ReceivedEventArgs tweetV2ReceivedEventArgs)
     {
-        if (tweetV2ReceivedEventArgs.Tweet?.Entities?.Hashtags?.Any() ?? true)
+        if (!tweetV2ReceivedEventArgs.Tweet?.Entities?.Hashtags?.Any() ?? true)
         {
             return;
         }

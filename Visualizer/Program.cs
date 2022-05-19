@@ -30,8 +30,10 @@ ServiceRegistrator.Register(builder.Services);
 // Add services for the Services project
 Visualizer.Services.ServiceRegistrator.Register(builder.Services);
 
-// Add hosted services
+// Add my services
 builder.Services.AddHostedService<IndexInitializer>();
+builder.Services.AddSingleton<TweeterStreamingStarterService>();
+builder.Services.AddHostedService<TweeterStreamingStarterService>(provider => provider.GetService<TweeterStreamingStarterService>());
 
 var app = builder.Build();
 

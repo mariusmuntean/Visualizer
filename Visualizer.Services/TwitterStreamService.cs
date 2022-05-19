@@ -1,6 +1,6 @@
 ﻿using Tweetinvi;
-using Tweetinvi.Parameters;
 using Tweetinvi.Parameters.V2;
+using Tweetinvi.Streaming.V2;
 
 namespace Visualizer.Services;
 
@@ -10,6 +10,7 @@ public class TwitterStreamService
     private readonly TweetGraphService _tweetGraphService;
     private readonly TweetDbService _tweetDbService;
     private readonly TweetHashtagService _tweetHashtagService;
+    private ISampleStreamV2? _sampleStream;
 
     public TwitterStreamService(TwitterClient twitterClient, TweetGraphService tweetGraphService, TweetDbService tweetDbService, TweetHashtagService tweetHashtagService)
     {
@@ -24,8 +25,8 @@ public class TwitterStreamService
         var currentAmount = 0;
         var stopped = false;
 
-        var filteredStream = _twitterClient.StreamsV2.CreateSampleStream();
-        filteredStream.TweetReceived += async (sender, args) =>
+        _sampleStream = _twitterClient.StreamsV2.CreateSampleStream();
+        _sampleStream.TweetReceived += async (sender, args) =>
         {
             try
             {
@@ -44,13 +45,25 @@ public class TwitterStreamService
             {
                 if (currentAmount >= amount && !stopped)
                 {
-                    filteredStream.StopStream();
+                    _sampleStream.StopStream();
                     stopped = true;
                 }
             }
         };
 
-        await filteredStream.StartAsync();
+        try
+        {
+            await _sampleStream.StartAsync();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
+    }
+
+    public void StopSampledStream()
+    {
+        _sampleStream?.StopStream();
     }
 
     public async Task ProcessFilteredStream(int amount = 10)
@@ -105,10 +118,7 @@ public class TwitterStreamService
         var stopped = false;
 
         var filteredStream = _twitterClient.Streams.CreateFilteredStream();
-        filteredStream.AddTrack("france", tweet =>
-        {
-            Console.WriteLine(tweet.Text);
-        });
+        filteredStream.AddTrack("france", tweet => { Console.WriteLine(tweet.Text); });
         filteredStream.EventReceived += async (sender, args) =>
         {
             try

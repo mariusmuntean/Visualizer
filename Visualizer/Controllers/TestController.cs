@@ -7,17 +7,17 @@ namespace Visualizer.Controllers;
 [Route("[controller]")]
 public class TestController : ControllerBase
 {
-    private readonly TweetBatchDownloadService _tweetBatchDownloadService;
+    private readonly TwitterStreamService _twitterStreamService;
 
-    public TestController(TweetBatchDownloadService tweetBatchDownloadService)
+    public TestController(TwitterStreamService twitterStreamService)
     {
-        _tweetBatchDownloadService = tweetBatchDownloadService;
+        _twitterStreamService = twitterStreamService;
     }
 
     [HttpPost("{amount}")]
     public async Task<IActionResult> BatchDownload([FromRoute] int amount)
     {
-        await _tweetBatchDownloadService.BatchDownloadTweets(amount);
+        await _twitterStreamService.ProcessSampleStream(amount);
         return Ok();
     }
 }

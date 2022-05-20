@@ -22,8 +22,8 @@ public class TwitterStreamService
 
     public async Task ProcessSampleStream(int amount = 10)
     {
-        await _tweetHashtagService.GetTopHashtags(10);
-
+        await _tweetGraphService.GetNodes();
+        
         var currentAmount = 0;
         var stopped = false;
 

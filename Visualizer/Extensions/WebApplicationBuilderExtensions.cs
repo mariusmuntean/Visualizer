@@ -1,22 +1,15 @@
 using System.Security.Claims;
 using GraphQL;
+using GraphQL.DataLoader;
 using GraphQL.MicrosoftDI;
+using GraphQL.Server;
+using GraphQL.Server.Transports.AspNetCore;
+using GraphQL.SystemTextJson;
 using NRedisGraph;
 using Redis.OM;
 using StackExchange.Redis;
 using Tweetinvi;
 using Tweetinvi.Models;
-using GraphQL.DataLoader;
-using GraphQL.Execution;
-using GraphQL.MicrosoftDI;
-using GraphQL.Server;
-using GraphQL.Server.Authorization.AspNetCore;
-using GraphQL.Server.Transports.AspNetCore;
-using GraphQL.Server.Ui.Altair;
-using GraphQL.Server.Ui.GraphiQL;
-using GraphQL.Server.Ui.Playground;
-using GraphQL.Server.Ui.Voyager;
-using GraphQL.SystemTextJson;
 using Visualizer.GraphQl;
 
 namespace Visualizer.Extensions;
@@ -70,7 +63,7 @@ public static class WebApplicationBuilderExtensions
             .AddSchema<VisualizerSchema>()
             .ConfigureExecutionOptions(options =>
             {
-                options.EnableMetrics = true;
+                options.EnableMetrics = false; // faster if disabled
                 var logger = options.RequestServices.GetRequiredService<ILogger<Program>>();
                 options.UnhandledExceptionDelegate = ctx =>
                 {

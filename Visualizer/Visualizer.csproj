@@ -24,4 +24,8 @@
         <ProjectReference Include="..\Visualizer.Services\Visualizer.Services.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="GraphQl\Subscriptions" />
+    </ItemGroup>
+
 </Project>

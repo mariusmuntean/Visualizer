@@ -56,6 +56,7 @@ public class TwitterStreamService
         try
         {
             await _sampleStream.StartAsync();
+            Console.WriteLine("Started streaming");
         }
         catch (Exception e)
         {

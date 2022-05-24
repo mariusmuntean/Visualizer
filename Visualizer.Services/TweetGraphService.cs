@@ -58,7 +58,7 @@ public class TweetGraphService
         }
         catch (Exception e)
         {
-            await Console.Error.WriteLineAsync($"Failed to add nodes: {System.Text.Json.JsonSerializer.Serialize(e)}");
+            await Console.Error.WriteLineAsync($"Failed to add nodes: {e.Message} {e.Source} {e.StackTrace} {e.Data}");
         }
     }
 

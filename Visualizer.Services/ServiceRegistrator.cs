@@ -9,6 +9,7 @@ public static class ServiceRegistrator
         serviceCollection.AddScoped<TwitterStreamService>();
         serviceCollection.AddScoped<TweetGraphService>();
         serviceCollection.AddScoped<TweetDbService>();
-        serviceCollection.AddScoped<TweetHashtagService>();
+        
+        serviceCollection.AddSingleton<TweetHashtagService>();
     }
 }

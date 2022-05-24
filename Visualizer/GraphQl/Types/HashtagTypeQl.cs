@@ -1,14 +1,15 @@
 using GraphQL.Types;
 using StackExchange.Redis;
+using Visualizer.Services;
 
 namespace Visualizer.GraphQl.Types;
 
-public class HashtagTypeQl : ObjectGraphType<SortedSetEntry>
+public class HashtagTypeQl : ObjectGraphType<TweetHashtagService.ScoredHashtag>
 {
     public HashtagTypeQl()
     {
+        Field(entry => entry.Name, false, typeof(StringGraphType));
         Field(entry => entry.Score, false, typeof(DecimalGraphType));
-        Field("Name", entry => entry.Element.ToString(), false, typeof(StringGraphType));
 
         // ToDo: add another typeQl class for GraphResult
     }

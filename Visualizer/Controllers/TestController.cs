@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Visualizer.HostedServices;
 using Visualizer.Services;
+using Visualizer.Services.Ingestion;
 
 namespace Visualizer.Controllers;
 

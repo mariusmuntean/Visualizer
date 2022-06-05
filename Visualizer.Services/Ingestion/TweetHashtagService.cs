@@ -3,7 +3,7 @@ using System.Reactive.Subjects;
 using StackExchange.Redis;
 using Tweetinvi.Events.V2;
 
-namespace Visualizer.Services;
+namespace Visualizer.Services.Ingestion;
 
 public class TweetHashtagService
 {

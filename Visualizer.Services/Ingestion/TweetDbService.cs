@@ -3,7 +3,7 @@ using Redis.OM;
 using Tweetinvi.Events.V2;
 using Visualizer.Model;
 
-namespace Visualizer.Services;
+namespace Visualizer.Services.Ingestion;
 
 public class TweetDbService
 {

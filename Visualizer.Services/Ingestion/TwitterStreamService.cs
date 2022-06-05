@@ -1,7 +1,7 @@
 ﻿using Tweetinvi;
 using Tweetinvi.Streaming.V2;
 
-namespace Visualizer.Services;
+namespace Visualizer.Services.Ingestion;
 
 public class TwitterStreamService
 {

@@ -1,7 +1,7 @@
 using NRedisGraph;
 using Tweetinvi.Events.V2;
 
-namespace Visualizer.Services;
+namespace Visualizer.Services.Ingestion;
 
 public class TweetGraphService
 {

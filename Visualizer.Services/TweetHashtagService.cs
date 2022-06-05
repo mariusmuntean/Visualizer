@@ -1,4 +1,3 @@
-using System.Collections.Concurrent;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using StackExchange.Redis;
@@ -16,12 +15,12 @@ public class TweetHashtagService
     public TweetHashtagService(IDatabase database)
     {
         _database = database;
-        AllHashtags = new ConcurrentStack<ScoredHashtag>();
+        // AllHashtags = new ConcurrentStack<ScoredHashtag>();
     }
 
     public async Task AddHashtags(TweetV2ReceivedEventArgs tweetV2ReceivedEventArgs)
     {
-        if (!tweetV2ReceivedEventArgs.Tweet?.Entities?.Hashtags?.Any() ?? true)
+        if (!tweetV2ReceivedEventArgs.Tweet?.Entities?.Hashtags?.Any() ?? false)
         {
             return;
         }
@@ -40,7 +39,7 @@ public class TweetHashtagService
             var newScore = await _database.SortedSetIncrementAsync(new RedisKey(HASHTAGS), new RedisValue(hashtag), 1);
 
             var sortedSetEntry = new ScoredHashtag { Name = hashtag, Score = newScore};
-            AllHashtags.Push(sortedSetEntry);
+            // AllHashtags.Push(sortedSetEntry);
             _hashtagStream.OnNext(sortedSetEntry);
         }
         catch (Exception ex)
@@ -50,7 +49,7 @@ public class TweetHashtagService
     }
 
     public IObservable<ScoredHashtag> Hashtags() => _hashtagStream.AsObservable();
-    public ConcurrentStack<ScoredHashtag> AllHashtags { get; }
+    // public ConcurrentStack<ScoredHashtag> AllHashtags { get; }
 
     public async Task<ScoredHashtag[]> GetTopHashtags(int amount = 10)
     {

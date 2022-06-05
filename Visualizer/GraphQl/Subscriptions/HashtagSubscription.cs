@@ -1,7 +1,6 @@
 using GraphQL;
 using GraphQL.Resolvers;
 using GraphQL.Types;
-using StackExchange.Redis;
 using Visualizer.GraphQl.Types;
 using Visualizer.Services;
 

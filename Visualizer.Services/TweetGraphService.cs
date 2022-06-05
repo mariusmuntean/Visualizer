@@ -1,4 +1,3 @@
-using Newtonsoft.Json.Linq;
 using NRedisGraph;
 using Tweetinvi.Events.V2;
 

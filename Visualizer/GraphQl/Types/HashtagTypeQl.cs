@@ -1,5 +1,4 @@
 using GraphQL.Types;
-using StackExchange.Redis;
 using Visualizer.Services;
 
 namespace Visualizer.GraphQl.Types;

@@ -25,7 +25,7 @@ public class TweetDbService
         }
         catch (Exception e)
         {
-            await Console.Error.WriteLineAsync($"Failed to process tweet event {tweetV2ReceivedEventArgs?.Tweet?.Id}");
+            await Console.Error.WriteLineAsync($"Failed to process tweet event {tweetV2ReceivedEventArgs?.Tweet?.Id} {e.Message} {e.StackTrace}");
             return null;
         }
 

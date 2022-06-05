@@ -25,11 +25,18 @@ public class TweetGraphService
 
         try
         {
+            var transaction = _redisGraph.Multi();
+            
+            // Ensure there's an index on the ID field
+            var addIndexQuery = "CREATE INDEX ON :user(id)";
+            // Console.WriteLine(addIndexQuery);
+            await transaction.QueryAsync("users", addIndexQuery);
+            
             // Add a node for the tweet author
             var userName = Uri.EscapeDataString(user.Name);
             var addUserQuery = $"CREATE(:user{{id:'{user.Id}', userName:'{userName}'}})";
-            Console.WriteLine(addUserQuery);
-            var result = await _redisGraph.QueryAsync("users", addUserQuery);
+            // Console.WriteLine(addUserQuery);
+            await transaction.QueryAsync("users", addUserQuery);
 
             var otherUsers = includes.Users.Where(u => u.Id != tweet.AuthorId);
             if (otherUsers.Any() == false)
@@ -43,17 +50,19 @@ public class TweetGraphService
                 var otherUserName = Uri.UnescapeDataString(otherUser.Name);
 
                 var addOtherUserQuery = $"CREATE(:user{{id:'{otherUser.Id}', userName:'{otherUserName}'}})";
-                Console.WriteLine(addOtherUserQuery);
-                var addOtherUserResult = await _redisGraph.QueryAsync("users", addOtherUserQuery);
+                // Console.WriteLine(addOtherUserQuery);
+                await transaction.QueryAsync("users", addOtherUserQuery);
 
                 var addOtherUserRelQuery = $"MATCH (a:user {{ id : '{user.Id}' }}), (b:user {{ id : '{otherUser.Id}' }}) CREATE (a)-[:mentioned]->(b)";
-                Console.WriteLine(addOtherUserRelQuery);
-                var addOtherUserRelationshipResult = await _redisGraph.QueryAsync("users", addOtherUserRelQuery);
+                // Console.WriteLine(addOtherUserRelQuery);
+                await transaction.QueryAsync("users", addOtherUserRelQuery);
 
                 var addOtherUserInverseRelQuery = $"MATCH (a:user {{ id : '{otherUser.Id}' }}), (b:user {{ id : '{user.Id}' }}) CREATE (a)-[:was_mentioned_by]->(b)";
-                Console.WriteLine(addOtherUserInverseRelQuery);
-                var addOtherUserInverseRelationshipResult = await _redisGraph.QueryAsync("users", addOtherUserInverseRelQuery);
+                // Console.WriteLine(addOtherUserInverseRelQuery);
+                await transaction.QueryAsync("users", addOtherUserInverseRelQuery);
             }
+
+            var results = await transaction.ExecAsync();
         }
         catch (Exception e)
         {

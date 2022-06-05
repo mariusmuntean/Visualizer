@@ -20,7 +20,7 @@ public class TweetHashtagService
 
     public async Task AddHashtags(TweetV2ReceivedEventArgs tweetV2ReceivedEventArgs)
     {
-        if (!tweetV2ReceivedEventArgs.Tweet?.Entities?.Hashtags?.Any() ?? false)
+        if (!tweetV2ReceivedEventArgs.Tweet?.Entities?.Hashtags?.Any() ?? true)
         {
             return;
         }
@@ -44,7 +44,7 @@ public class TweetHashtagService
         }
         catch (Exception ex)
         {
-            await Console.Error.WriteLineAsync($"Failed to add/increment {hashtag} in the sorted set {HASHTAGS}. {ex.StackTrace}");
+            await Console.Error.WriteLineAsync($"Failed to add/increment hashtag {hashtag} in the sorted set {HASHTAGS}. {ex.Message} {ex.StackTrace}");
         }
     }
 

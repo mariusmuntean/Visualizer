@@ -35,12 +35,19 @@ public static class WebApplicationBuilderExtensions
     {
         var connectionString = webApplicationBuilder.Configuration.GetSection("Redis")["ConnectionString"]
                                ?? throw new Exception("Cannot read Redis connection string");
-        webApplicationBuilder.Services.AddSingleton(new RedisConnectionProvider(connectionString));
+        var redisConnectionProvider = new RedisConnectionProvider(connectionString);
+        webApplicationBuilder.Services.AddSingleton(redisConnectionProvider);
     }
 
     public static void AddRedisGraph(this WebApplicationBuilder webApplicationBuilder)
     {
-        var muxer = ConnectionMultiplexer.Connect("localhost");
+        // var muxer = ConnectionMultiplexer.Connect("localhost");
+        var configurationOptions = ConfigurationOptions.Parse("localhost");
+        configurationOptions.SyncTimeout = 10000;
+        configurationOptions.AsyncTimeout = 10000;
+        configurationOptions.IncludePerformanceCountersInExceptions = true;
+        configurationOptions.IncludeDetailInExceptions = true;
+        var muxer = ConnectionMultiplexer.Connect(configurationOptions);
         var db = muxer.GetDatabase();
         var graph = new RedisGraph(db);
 

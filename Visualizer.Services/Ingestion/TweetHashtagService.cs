@@ -87,6 +87,8 @@ public class TweetHashtagService
                                 await _database.SortedSetAddAsync(previousKey,
                                     currentRankedHashtags.Select(scoredHashtag => new SortedSetEntry(new RedisValue(scoredHashtag.Name), scoredHashtag.Score)).ToArray());
                                 rankedHashtagsSubject.OnNext(currentRankedHashtags);
+                                
+                                break;
                             }
                         }
                     }

@@ -1,7 +1,6 @@
 using GraphQL;
 using GraphQL.Types;
 using Visualizer.GraphQl.Types;
-using Visualizer.Services;
 using Visualizer.Services.Ingestion;
 
 namespace Visualizer.GraphQl.Queries;

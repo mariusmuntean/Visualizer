@@ -1,7 +1,6 @@
 using GraphQL;
 using GraphQL.Types;
 using Visualizer.GraphQl.Types;
-using Visualizer.Services;
 using Visualizer.Services.Ingestion;
 
 namespace Visualizer.GraphQl.Queries;
@@ -14,7 +13,7 @@ public class GraphResultQuery : ObjectGraphType
 
         FieldAsync<GraphResultTypeQl>("GraphResults",
             arguments: new QueryArguments(
-                new QueryArgument<IntGraphType> { Name = "amount", DefaultValue = 10 }
+                new QueryArgument<IntGraphType> {Name = "amount", DefaultValue = 10}
             ),
             resolve: async context =>
             {

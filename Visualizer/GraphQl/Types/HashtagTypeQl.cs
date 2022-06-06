@@ -1,5 +1,4 @@
 using GraphQL.Types;
-using Visualizer.Services;
 using Visualizer.Services.Ingestion;
 
 namespace Visualizer.GraphQl.Types;

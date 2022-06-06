@@ -1,4 +1,5 @@
 using GraphQL.Types;
+using Visualizer.GraphQl.Mutations;
 using Visualizer.GraphQl.Queries;
 using Visualizer.GraphQl.Subscriptions;
 
@@ -8,10 +9,13 @@ public class VisualizerSchema : Schema
 {
     public VisualizerSchema(IServiceProvider serviceProvider) : base(serviceProvider)
     {
-        this.Query = serviceProvider.GetRequiredService<VisualizerQuery>();
-        // this.Subscription = serviceProvider.GetRequiredService<VisualizerSubscription>();
-        this.Subscription = new HashtagSubscription(serviceProvider);
+        Query = serviceProvider.GetRequiredService<VisualizerQuery>();
+        Mutation = serviceProvider.GetRequiredService<VisualizerMutation>();
+        // Subscription = serviceProvider.GetRequiredService<VisualizerSubscription>();
+        Subscription = new HashtagSubscription(serviceProvider);
     }
+
+    // The following classes aren't explicitly added to the DI container, but they're still there. The "AddGraphTypes(...)" takes care of this.
 
     public class VisualizerQuery : ObjectGraphType
     {
@@ -20,15 +24,25 @@ public class VisualizerSchema : Schema
             Name = nameof(VisualizerQuery);
             Field<HashtagQuery>("hashtag", resolve: context => new { });
             Field<GraphResultQuery>("graphResult", resolve: context => new { });
+            Field<StreamingQuery>("streaming", resolve: context => new { });
         }
     }
-    
-    // public class VisualizerSubscription : ObjectGraphType
-    // {
-    //     public VisualizerSubscription()
-    //     {
-    //         Name = nameof(VisualizerSubscription);
-    //         Field<HashtagSubscription>("hashtagSubscription", resolve: context => new { });
-    //     }
-    // }
+
+    public class VisualizerMutation : ObjectGraphType
+    {
+        public VisualizerMutation()
+        {
+            Name = nameof(VisualizerMutation);
+            Field<StreamingMutations>("streaming", resolve: context => new { });
+        }
+    }
+
+    public class VisualizerSubscription : ObjectGraphType
+    {
+        public VisualizerSubscription()
+        {
+            Name = nameof(VisualizerSubscription);
+            Field<HashtagSubscription>("hashtagSubscription", resolve: context => new { });
+        }
+    }
 }

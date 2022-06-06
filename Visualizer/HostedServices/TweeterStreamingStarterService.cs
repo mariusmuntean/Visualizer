@@ -1,4 +1,3 @@
-using Visualizer.Services;
 using Visualizer.Services.Ingestion;
 
 namespace Visualizer.HostedServices;
@@ -13,6 +12,8 @@ public class TweeterStreamingStarterService : IHostedService
         var scope = serviceProvider.CreateScope();
         _twitterStreamService = scope.ServiceProvider.GetService<TwitterStreamService>();
     }
+
+    public bool IsStreaming => _isStreaming;
 
     public Task StartAsync(CancellationToken cancellationToken)
     {

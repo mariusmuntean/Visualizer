@@ -2,17 +2,20 @@ using GraphQL;
 using GraphQL.Resolvers;
 using GraphQL.Types;
 using Visualizer.GraphQl.Types;
+using Visualizer.HostedServices;
 using Visualizer.Services.Ingestion;
 
 namespace Visualizer.GraphQl.Subscriptions;
 
-public class HashtagSubscription : ObjectGraphType
+public class VisualizerSubscription : ObjectGraphType
 {
     private readonly TweetHashtagService _tweetHashtagService;
+    private readonly TweeterStreamingStarterService _tweeterStreamingStarterService;
 
-    public HashtagSubscription(IServiceProvider provider)
+    public VisualizerSubscription(IServiceProvider provider)
     {
         _tweetHashtagService = provider.CreateScope().ServiceProvider.GetRequiredService<TweetHashtagService>();
+        _tweeterStreamingStarterService = provider.CreateScope().ServiceProvider.GetRequiredService<TweeterStreamingStarterService>();
 
         AddField(new FieldType
         {
@@ -29,6 +32,15 @@ public class HashtagSubscription : ObjectGraphType
             Arguments = new QueryArguments(new QueryArgument<IntGraphType>() {Name = "amount", DefaultValue = 10}),
             Resolver = new FuncFieldResolver<TweetHashtagService.ScoredHashtag[]>(ResolveRankedHashtags),
             StreamResolver = new SourceStreamResolver<TweetHashtagService.ScoredHashtag[]>(SubscribeToRankedHashtags)
+        });
+
+        AddField(new FieldType
+        {
+            Name = "isStreamingChanged",
+            Description = "Produces updates whenever the live ingestion has changed",
+            Type = typeof(IsStreamingStateTypeQl),
+            Resolver = new FuncFieldResolver<TweeterStreamingStarterService.IsStreamingState>(ResolveIsStreaming),
+            StreamResolver = new SourceStreamResolver<TweeterStreamingStarterService.IsStreamingState>(SubscribeIsStreaming)
         });
     }
 
@@ -55,5 +67,17 @@ public class HashtagSubscription : ObjectGraphType
     {
         var amount = context.GetArgument<int>("amount");
         return _tweetHashtagService.GetRankedHashtagsObservable(amount);
+    }
+
+    private TweeterStreamingStarterService.IsStreamingState ResolveIsStreaming(IResolveFieldContext context)
+    {
+        var message = context.Source;
+
+        return message as TweeterStreamingStarterService.IsStreamingState;
+    }
+
+    private IObservable<TweeterStreamingStarterService.IsStreamingState> SubscribeIsStreaming(IResolveFieldContext context)
+    {
+        return _tweeterStreamingStarterService.GetIsStreamingObservable();
     }
 }

@@ -12,7 +12,7 @@ public class VisualizerSchema : Schema
         Query = serviceProvider.GetRequiredService<VisualizerQuery>();
         Mutation = serviceProvider.GetRequiredService<VisualizerMutation>();
         // Subscription = serviceProvider.GetRequiredService<VisualizerSubscription>();
-        Subscription = new HashtagSubscription(serviceProvider);
+        Subscription = new Subscriptions.VisualizerSubscription(serviceProvider);
     }
 
     // The following classes aren't explicitly added to the DI container, but they're still there. The "AddGraphTypes(...)" takes care of this.
@@ -37,12 +37,13 @@ public class VisualizerSchema : Schema
         }
     }
 
+    // It seems to be a limitation of our graphql lib that forces us to have all the subscriptions in a single class, instead of the normal hierarchical organization.
     public class VisualizerSubscription : ObjectGraphType
     {
         public VisualizerSubscription()
         {
             Name = nameof(VisualizerSubscription);
-            Field<HashtagSubscription>("hashtagSubscription", resolve: context => new { });
+            Field<Subscriptions.VisualizerSubscription>("subscriptions", resolve: context => new { });
         }
     }
 }

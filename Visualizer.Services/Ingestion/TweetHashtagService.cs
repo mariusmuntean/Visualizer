@@ -12,14 +12,14 @@ public class TweetHashtagService
 
     private readonly IDatabase _database;
     private readonly ISubject<ScoredHashtag> _hashtagAddedStream = new ReplaySubject<ScoredHashtag>(1);
-    private readonly ConcurrentDictionary<int, ISubject<ScoredHashtag[]>> _amountToRankedHashtagsMap;
+    private readonly ConcurrentDictionary<int, ReplaySubject<ScoredHashtag[]>> _amountToRankedHashtagsMap;
 
     public TweetHashtagService(IDatabase database)
     {
         _database = database;
         // AllHashtags = new ConcurrentStack<ScoredHashtag>();
 
-        _amountToRankedHashtagsMap = new ConcurrentDictionary<int, ISubject<ScoredHashtag[]>>();
+        _amountToRankedHashtagsMap = new ConcurrentDictionary<int, ReplaySubject<ScoredHashtag[]>>();
     }
 
     public async Task AddHashtags(TweetV2ReceivedEventArgs tweetV2ReceivedEventArgs)
@@ -47,18 +47,22 @@ public class TweetHashtagService
             // AllHashtags.Push(sortedSetEntry);
             _hashtagAddedStream.OnNext(sortedSetEntry);
 
+
             // Ranked hashtags subscriptions - for each subscription: get the ranked hashtags (amount from subscription) and compare to previous value. If no previous value exists or if it is distinct from the current value, then provide the observer with new data.
             foreach (var (amount, rankedHashtagsSubject) in _amountToRankedHashtagsMap)
             {
+                var previousKey = new RedisKey($"previous_ranked_hashtags_amount_{amount}");
+
+                // Trim the subscription
+                if (await TrimSubscriptionIfNecessary(rankedHashtagsSubject, amount, previousKey)) continue;
+
                 var currentRankedHashtags = await GetTopHashtags(amount);
 
-                var previousKey = new RedisKey($"previous_ranked_hashtags_amount_{amount}");
                 var previousExists = await _database.KeyExistsAsync(previousKey);
                 if (!previousExists)
                 {
                     // cache the current ranked hashtags for the current amount
-                    await _database.SortedSetAddAsync(previousKey,
-                        currentRankedHashtags.Select(scoredHashtag => new SortedSetEntry(new RedisValue(scoredHashtag.Name), scoredHashtag.Score)).ToArray());
+                    await CacheCurrentRankedHashtags(previousKey, currentRankedHashtags);
                     rankedHashtagsSubject.OnNext(currentRankedHashtags);
                 }
                 else
@@ -67,9 +71,7 @@ public class TweetHashtagService
                     if (previousValue?.Length != currentRankedHashtags.Length)
                     {
                         // delete the previous ranked hashtags for the current amount and cache the current ranked hashtags for the current amount
-                        await _database.KeyDeleteAsync(previousKey);
-                        await _database.SortedSetAddAsync(previousKey,
-                            currentRankedHashtags.Select(scoredHashtag => new SortedSetEntry(new RedisValue(scoredHashtag.Name), scoredHashtag.Score)).ToArray());
+                        await ReplaceCurrentRankedHashtags(previousKey, currentRankedHashtags);
                         rankedHashtagsSubject.OnNext(currentRankedHashtags);
                     }
                     else
@@ -83,11 +85,9 @@ public class TweetHashtagService
                                 Math.Abs(currentRankedHashtag.Score - previousRankedHashtag.Score) > double.Epsilon)
                             {
                                 // delete the previous ranked hashtags for the current amount and cache the current ranked hashtags for the current amount 
-                                await _database.KeyDeleteAsync(previousKey);
-                                await _database.SortedSetAddAsync(previousKey,
-                                    currentRankedHashtags.Select(scoredHashtag => new SortedSetEntry(new RedisValue(scoredHashtag.Name), scoredHashtag.Score)).ToArray());
+                                await ReplaceCurrentRankedHashtags(previousKey, currentRankedHashtags);
                                 rankedHashtagsSubject.OnNext(currentRankedHashtags);
-                                
+
                                 break;
                             }
                         }
@@ -103,7 +103,7 @@ public class TweetHashtagService
 
     public IObservable<ScoredHashtag> GetHashtagAddedObservable()
     {
-        return _hashtagAddedStream.AsObservable();
+        return _hashtagAddedStream.AsObservable().Sample(TimeSpan.FromSeconds(1));
     }
 
     public IObservable<ScoredHashtag[]> GetRankedHashtagsObservable(int amount = 10)
@@ -111,7 +111,37 @@ public class TweetHashtagService
         return _amountToRankedHashtagsMap.GetOrAdd(amount, a => new ReplaySubject<ScoredHashtag[]>(1));
     }
 
-    // public ConcurrentStack<ScoredHashtag> AllHashtags { get; }
+
+    private async Task ReplaceCurrentRankedHashtags(RedisKey previousKey, ScoredHashtag[] currentRankedHashtags)
+    {
+        await _database.KeyDeleteAsync(previousKey);
+        await CacheCurrentRankedHashtags(previousKey, currentRankedHashtags);
+    }
+
+    private async Task CacheCurrentRankedHashtags(RedisKey previousKey, ScoredHashtag[] currentRankedHashtags)
+    {
+        var sortedSetEntries = currentRankedHashtags.Select(scoredHashtag => new SortedSetEntry(new RedisValue(scoredHashtag.Name), scoredHashtag.Score)).ToArray();
+        await _database.SortedSetAddAsync(previousKey, sortedSetEntries);
+    }
+
+    private async Task<bool> TrimSubscriptionIfNecessary(ReplaySubject<ScoredHashtag[]> rankedHashtagsSubject, int amount, RedisKey previousKey)
+    {
+        if (rankedHashtagsSubject.HasObservers == false)
+        {
+            if (_amountToRankedHashtagsMap.TryRemove(amount, out var _))
+            {
+                Console.WriteLine($"Removed subscription {amount}");
+                if (await _database.KeyDeleteAsync(previousKey))
+                {
+                    Console.WriteLine($"Removed the sorted set for {amount}");
+                }
+
+                return true;
+            }
+        }
+
+        return false;
+    }
 
     public async Task<ScoredHashtag[]> GetTopHashtags(int amount = 10)
     {

@@ -37,7 +37,7 @@ public class VisualizerSubscription : ObjectGraphType
         AddField(new FieldType
         {
             Name = "isStreamingChanged",
-            Description = "Produces updates whenever the live ingestion has changed",
+            Description = "Produces updates whenever the state of the live ingestion has changed",
             Type = typeof(IsStreamingStateTypeQl),
             Resolver = new FuncFieldResolver<TweeterStreamingStarterService.IsStreamingState>(ResolveIsStreaming),
             StreamResolver = new SourceStreamResolver<TweeterStreamingStarterService.IsStreamingState>(SubscribeIsStreaming)
@@ -59,7 +59,6 @@ public class VisualizerSubscription : ObjectGraphType
     private TweetHashtagService.ScoredHashtag[] ResolveRankedHashtags(IResolveFieldContext context)
     {
         var message = context.Source as TweetHashtagService.ScoredHashtag[];
-
         return message;
     }
 

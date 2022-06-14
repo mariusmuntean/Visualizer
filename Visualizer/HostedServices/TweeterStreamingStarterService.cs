@@ -1,4 +1,3 @@
-using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using Visualizer.Services.Ingestion;
 
@@ -19,10 +18,7 @@ public class TweeterStreamingStarterService : IHostedService
     public bool IsStreaming
     {
         get => _isStreaming;
-        private set
-        {
-            _isStreaming = value;
-        }
+        private set { _isStreaming = value; }
     }
 
     public IObservable<IsStreamingState> GetIsStreamingObservable() => _isStreamingSubject;

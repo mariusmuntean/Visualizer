@@ -26,12 +26,7 @@ public class TweetGraphService
         try
         {
             var transaction = _redisGraph.Multi();
-            
-            // Ensure there's an index on the ID field
-            var addIndexQuery = "CREATE INDEX ON :user(id)";
-            // Console.WriteLine(addIndexQuery);
-            await transaction.QueryAsync("users", addIndexQuery);
-            
+
             // Add a node for the tweet author
             var userName = Uri.EscapeDataString(user.Name);
             var addUserQuery = $"CREATE(:user{{id:'{user.Id}', userName:'{userName}'}})";

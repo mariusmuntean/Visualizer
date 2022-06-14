@@ -40,6 +40,7 @@ Visualizer.Services.ServiceRegistrator.Register(builder.Services);
 
 // Add my services
 builder.Services.AddHostedService<IndexInitializer>();
+builder.Services.AddHostedService<GraphInitializer>();
 builder.Services.AddSingleton<TweeterStreamingStarterService>();
 builder.Services.AddHostedService<TweeterStreamingStarterService>(provider => provider.GetService<TweeterStreamingStarterService>());
 

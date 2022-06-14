@@ -1,7 +1,6 @@
 using GraphQL.Types;
 using Visualizer.GraphQl.Mutations;
 using Visualizer.GraphQl.Queries;
-using Visualizer.GraphQl.Subscriptions;
 
 namespace Visualizer.GraphQl;
 

@@ -42,7 +42,7 @@ public class TweetGraphService
             // Add a node and a relationship for each referenced user
             foreach (var otherUser in otherUsers)
             {
-                var otherUserName = Uri.UnescapeDataString(otherUser.Name);
+                var otherUserName = Uri.EscapeDataString(otherUser.Name);
 
                 var addOtherUserQuery = $"CREATE(:user{{id:'{otherUser.Id}', userName:'{otherUserName}'}})";
                 // Console.WriteLine(addOtherUserQuery);

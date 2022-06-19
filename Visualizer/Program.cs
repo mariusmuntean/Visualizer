@@ -2,6 +2,8 @@ using GraphQL.Server.Ui.Altair;
 using GraphQL.Server.Ui.Voyager;
 using Mapster;
 using Redis.OM.Modeling;
+using Serilog;
+using Serilog.Events;
 using Tweetinvi.Core.Models;
 using Visualizer.Extensions;
 using Visualizer.GraphQl;
@@ -12,6 +14,14 @@ const string MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddJsonFile("appsettings.local.json", true, true);
+
+// Configure Serilog
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
+    .Enrich.FromLogContext()
+    .WriteTo.Console()
+    .CreateLogger();
+builder.Host.UseSerilog();
 
 // Add services to the container.
 
@@ -54,6 +64,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseSerilogRequestLogging();
 
 // Config Mapster
 TypeAdapterConfig<DateTimeOffset, DateTime>.NewConfig()
@@ -101,4 +113,19 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.Run();
+// Try to run the app
+try
+{
+    Log.Information("Starting web host");
+    app.Run();
+    return 0;
+}
+catch (Exception ex)
+{
+    Log.Fatal(ex, "Host terminated unexpectedly");
+    return 1;
+}
+finally
+{
+    Log.CloseAndFlush();
+}

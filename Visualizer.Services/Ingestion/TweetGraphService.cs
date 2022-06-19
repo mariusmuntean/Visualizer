@@ -28,7 +28,7 @@ public class TweetGraphService
             var transaction = _redisGraph.Multi();
 
             // Add a node for the tweet author
-            var userName = Uri.EscapeDataString(user.Name);
+            var userName = Uri.EscapeDataString(user.Username);
             var addUserQuery = $"CREATE(:user{{id:'{user.Id}', userName:'{userName}'}})";
             // Console.WriteLine(addUserQuery);
             await transaction.QueryAsync("users", addUserQuery);
@@ -42,7 +42,7 @@ public class TweetGraphService
             // Add a node and a relationship for each referenced user
             foreach (var otherUser in otherUsers)
             {
-                var otherUserName = Uri.EscapeDataString(otherUser.Name);
+                var otherUserName = Uri.EscapeDataString(otherUser.Username);
 
                 var addOtherUserQuery = $"CREATE(:user{{id:'{otherUser.Id}', userName:'{otherUserName}'}})";
                 // Console.WriteLine(addOtherUserQuery);
@@ -86,12 +86,12 @@ public class TweetGraphService
 
             if (!graphResult.Nodes.ContainsKey(idA))
             {
-                graphResult.Nodes.Add(idA, new { username = usernameA });
+                graphResult.Nodes.Add(idA, new { userName = usernameA });
             }
 
             if (!graphResult.Nodes.ContainsKey(idB))
             {
-                graphResult.Nodes.Add(idB, new { username = usernameB });
+                graphResult.Nodes.Add(idB, new { userName = usernameB });
             }
 
             graphResult.Edges.Add((idA, idB));

@@ -1,4 +1,5 @@
 using GraphQL.Types;
+using Newtonsoft.Json.Linq;
 using Visualizer.Services.Ingestion;
 
 namespace Visualizer.GraphQl.Types;
@@ -8,11 +9,11 @@ public class GraphResultTypeQl : ObjectGraphType<TweetGraphService.GraphResult>
     public GraphResultTypeQl()
     {
         Field(nameof(TweetGraphService.GraphResult.Nodes),
-            result => result.Nodes.Select(pair => new GraphNode { Id = pair.Key, Label = "unknown" }),
+            result => result.Nodes.Select(pair => new GraphNode {Id = pair.Key, Label = JObject.FromObject(pair.Value).Value<string>("userName")}).ToList(),
             false, typeof(ListGraphType<GraphNodeTypeQl>));
 
         Field(nameof(TweetGraphService.GraphResult.Edges),
-            result => result.Edges.Select(pair => new GraphEdge() { ToId = pair.fromId, FromId = pair.toId }),
+            result => result.Edges.Select(pair => new GraphEdge() {ToId = pair.fromId, FromId = pair.toId}),
             false, typeof(ListGraphType<GraphEdgeTypeQl>));
     }
 }

@@ -11,7 +11,7 @@ public class GraphResultQuery : ObjectGraphType
     {
         var tweetGraphService = provider.CreateScope().ServiceProvider.GetService<TweetGraphService>();
 
-        FieldAsync<GraphResultTypeQl>("GraphResults",
+        FieldAsync<GraphResultTypeQl>("graphResults",
             arguments: new QueryArguments(
                 new QueryArgument<IntGraphType> {Name = "amount", DefaultValue = 10}
             ),

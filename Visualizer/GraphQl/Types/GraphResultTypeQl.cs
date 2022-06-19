@@ -1,5 +1,4 @@
 using GraphQL.Types;
-using Newtonsoft.Json.Linq;
 using Visualizer.Services.Ingestion;
 
 namespace Visualizer.GraphQl.Types;
@@ -9,43 +8,31 @@ public class GraphResultTypeQl : ObjectGraphType<TweetGraphService.GraphResult>
     public GraphResultTypeQl()
     {
         Field(nameof(TweetGraphService.GraphResult.Nodes),
-            result => result.Nodes.Select(pair => new GraphNode {Id = pair.Key, Label = JObject.FromObject(pair.Value).Value<string>("userName")}).ToList(),
-            false, typeof(ListGraphType<GraphNodeTypeQl>));
+            result => result.Nodes.Values.ToArray(),
+            false, typeof(ListGraphType<UserNodeTypeQl>));
 
         Field(nameof(TweetGraphService.GraphResult.Edges),
-            result => result.Edges.Select(pair => new GraphEdge() {ToId = pair.fromId, FromId = pair.toId}),
-            false, typeof(ListGraphType<GraphEdgeTypeQl>));
+            result => result.Edges.ToArray(),
+            false, typeof(ListGraphType<MentionRelationshipTypeQl>));
     }
 }
 
-public class GraphNode
+public class UserNodeTypeQl : ObjectGraphType<TweetGraphService.UserNode>
 {
-    public string Id { get; set; }
-    public string Label { get; set; }
-    public string Title { get; set; }
-}
-
-public class GraphNodeTypeQl : ObjectGraphType<GraphNode>
-{
-    public GraphNodeTypeQl()
+    public UserNodeTypeQl()
     {
-        Field(node => node.Id, false);
-        Field(node => node.Label, true);
-        Field(node => node.Title, true);
+        Field(node => node.UserId, false);
+        Field(node => node.UserName, true);
     }
 }
 
-public class GraphEdge
+public class MentionRelationshipTypeQl : ObjectGraphType<TweetGraphService.MentionRelationship>
 {
-    public string FromId { get; set; }
-    public string ToId { get; set; }
-}
-
-public class GraphEdgeTypeQl : ObjectGraphType<GraphEdge>
-{
-    public GraphEdgeTypeQl()
+    public MentionRelationshipTypeQl()
     {
-        Field(graphEdge => graphEdge.FromId, false);
-        Field(graphEdge => graphEdge.ToId, false);
+        Field(graphEdge => graphEdge.FromUserId, false);
+        Field(graphEdge => graphEdge.ToUserId, false);
+        Field(graphEdge => graphEdge.TweetId, false);
+        Field(graphEdge => graphEdge.RelationshipType, false, typeof(EnumerationGraphType<TweetGraphService.MentionRelationshipType>));
     }
 }

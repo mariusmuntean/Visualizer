@@ -1,5 +1,6 @@
 using NRedisGraph;
 using Tweetinvi.Events.V2;
+using Visualizer.Services.Extensions;
 
 namespace Visualizer.Services.Ingestion;
 
@@ -29,7 +30,7 @@ public class TweetGraphService
 
             // Add a node for the tweet author
             var userName = Uri.EscapeDataString(user.Username);
-            var addUserQuery = $"CREATE(:user{{id:'{user.Id}', userName:'{userName}'}})";
+            var addUserQuery = $"CREATE(:user{{{nameof(UserNode.UserId)}:'{user.Id}', {nameof(UserNode.UserName)}:'{userName}'}})";
             // Console.WriteLine(addUserQuery);
             await transaction.QueryAsync("users", addUserQuery);
 
@@ -44,15 +45,17 @@ public class TweetGraphService
             {
                 var otherUserName = Uri.EscapeDataString(otherUser.Username);
 
-                var addOtherUserQuery = $"CREATE(:user{{id:'{otherUser.Id}', userName:'{otherUserName}'}})";
+                var addOtherUserQuery = $"CREATE(:user{{{nameof(UserNode.UserId)}:'{otherUser.Id}', {nameof(UserNode.UserName)}:'{otherUserName}'}})";
                 // Console.WriteLine(addOtherUserQuery);
                 await transaction.QueryAsync("users", addOtherUserQuery);
 
-                var addOtherUserRelQuery = $"MATCH (a:user {{ id : '{user.Id}' }}), (b:user {{ id : '{otherUser.Id}' }}) CREATE (a)-[:mentioned]->(b)";
+                var addOtherUserRelQuery =
+                    $"MATCH (a:user {{ {nameof(UserNode.UserId)} : '{user.Id}' }}), (b:user {{ {nameof(UserNode.UserId)} : '{otherUser.Id}' }}) CREATE (a)-[:mentioned {{ {nameof(MentionRelationship.TweetId)} : {tweet.Id} }} ]->(b)";
                 // Console.WriteLine(addOtherUserRelQuery);
                 await transaction.QueryAsync("users", addOtherUserRelQuery);
 
-                var addOtherUserInverseRelQuery = $"MATCH (a:user {{ id : '{otherUser.Id}' }}), (b:user {{ id : '{user.Id}' }}) CREATE (a)-[:was_mentioned_by]->(b)";
+                var addOtherUserInverseRelQuery =
+                    $"MATCH (a:user {{ {nameof(UserNode.UserId)} : '{otherUser.Id}' }}), (b:user {{ {nameof(UserNode.UserId)} : '{user.Id}' }}) CREATE (a)-[:was_mentioned_by {{ {nameof(MentionRelationship.TweetId)} : {tweet.Id} }} ]->(b)";
                 // Console.WriteLine(addOtherUserInverseRelQuery);
                 await transaction.QueryAsync("users", addOtherUserInverseRelQuery);
             }
@@ -67,43 +70,59 @@ public class TweetGraphService
 
     public async Task<GraphResult> GetNodes(int amount = 20)
     {
-        var queryUsers = $"match (a:user)-[r:mentioned]->(b:user) return a,b LIMIT {amount}";
+        var queryUsers = $"match (a:user)-[r:mentioned|:was_mentioned_by]->(b:user) return a,b,r LIMIT {amount}";
         Console.WriteLine(queryUsers);
         var queryUsersResult = await _redisGraph.QueryAsync("users", queryUsers);
         var records = queryUsersResult.ToList();
 
-        var graphResult = new GraphResult { Edges = new HashSet<(string fromId, string toId)>(), Nodes = new Dictionary<string, object>() };
+        var graphResult = new GraphResult {Nodes = new Dictionary<string, UserNode>(), Edges = new HashSet<MentionRelationship>()};
         foreach (var record in records)
         {
-            var results = record.Values.Select(v => v as Node);
+            var nodes = record.Values.OfType<Node>().ToArray();
+            if (!nodes.Any())
+            {
+                continue;
+            }
 
-            var idA = results.First().PropertyMap["id"].Value.ToString();
-            var usernameA = results.First().PropertyMap["userName"].Value.ToString();
-
-            var idB = results.Skip(1).First().PropertyMap["id"].Value.ToString();
-            var usernameB = results.Skip(1).First().PropertyMap["userName"].Value.ToString();
-
+            var firstNode = nodes.First();
+            var firstUserNode = firstNode.ToUserNode();
+            var idA = firstUserNode.UserId;
 
             if (!graphResult.Nodes.ContainsKey(idA))
             {
-                graphResult.Nodes.Add(idA, new { userName = usernameA });
+                graphResult.Nodes.Add(idA, firstUserNode);
             }
+
+            var secondNode = nodes.Skip(1).First();
+            var secondUserNode = secondNode.ToUserNode();
+            var idB = secondUserNode.UserId;
 
             if (!graphResult.Nodes.ContainsKey(idB))
             {
-                graphResult.Nodes.Add(idB, new { userName = usernameB });
+                graphResult.Nodes.Add(idB, secondUserNode);
             }
 
-            graphResult.Edges.Add((idA, idB));
+            var relationship = record.Values.OfType<Edge>().ToArray().Single();
+            graphResult.Edges.Add(relationship.ToMentionRelationship(idA, idB));
         }
-        
+
         return graphResult;
     }
 
     public class GraphResult
     {
-        public Dictionary<string, object> Nodes { get; set; }
+        public Dictionary<string, UserNode> Nodes { get; set; }
 
-        public HashSet<(string fromId, string toId)> Edges { get; set; }
+        public HashSet<MentionRelationship> Edges { get; set; }
     }
+
+    public record UserNode(string UserId, string UserName);
+
+    public enum MentionRelationshipType
+    {
+        Mentioned,
+        Was_Mentioned_By
+    }
+
+    public record MentionRelationship(string FromUserId, string ToUserId, string TweetId, MentionRelationshipType RelationshipType);
 }

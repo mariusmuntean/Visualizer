@@ -103,12 +103,13 @@ public class TweetHashtagService
 
     public IObservable<ScoredHashtag> GetHashtagAddedObservable()
     {
-        return _hashtagAddedStream.AsObservable().Sample(TimeSpan.FromSeconds(1));
+        return _hashtagAddedStream.AsObservable().Sample(TimeSpan.FromSeconds(5));
     }
 
     public IObservable<ScoredHashtag[]> GetRankedHashtagsObservable(int amount = 10)
     {
-        return _amountToRankedHashtagsMap.GetOrAdd(amount, a => new ReplaySubject<ScoredHashtag[]>(1));
+        var rankedHashtagsObservable = _amountToRankedHashtagsMap.GetOrAdd(amount, a => new ReplaySubject<ScoredHashtag[]>(1));
+        return rankedHashtagsObservable.AsObservable().Sample(TimeSpan.FromSeconds(5));
     }
 
 

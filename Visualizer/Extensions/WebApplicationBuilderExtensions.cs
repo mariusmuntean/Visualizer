@@ -1,16 +1,8 @@
-using System.Security.Claims;
-using GraphQL;
-using GraphQL.DataLoader;
-using GraphQL.MicrosoftDI;
-using GraphQL.Server;
-using GraphQL.Server.Transports.AspNetCore;
-using GraphQL.SystemTextJson;
 using NRedisGraph;
 using Redis.OM;
 using StackExchange.Redis;
 using Tweetinvi;
 using Tweetinvi.Models;
-using Visualizer.GraphQl;
 
 namespace Visualizer.Extensions;
 
@@ -53,39 +45,5 @@ public static class WebApplicationBuilderExtensions
 
         webApplicationBuilder.Services.AddSingleton(db);
         webApplicationBuilder.Services.AddSingleton(graph);
-    }
-
-
-    public static void AddVisualizerGraphQl(this WebApplicationBuilder webApplicationBuilder)
-    {
-        var services = webApplicationBuilder.Services;
-
-        // Add GraphQL services and configure options
-        services.AddSingleton<VisualizerSchema>();
-        services.AddSingleton<GraphQLHttpMiddleware<VisualizerSchema>>();
-        services.AddGraphQL(builder => builder
-            .AddApolloTracing()
-            .AddWebSocketsHttpMiddleware<VisualizerSchema>()
-            
-            .AddSchema<VisualizerSchema>()
-            .ConfigureExecutionOptions(options =>
-            {
-                options.EnableMetrics = false; // faster if disabled
-                var logger = options.RequestServices.GetRequiredService<ILogger<Program>>();
-                options.UnhandledExceptionDelegate = ctx =>
-                {
-                    logger.LogError("{Error} occurred", ctx.OriginalException.Message);
-                    return Task.CompletedTask;
-                };
-            })
-            .AddSystemTextJson()
-            .AddWebSockets()
-            .AddDataLoader()
-            .AddGraphTypes(typeof(VisualizerSchema).Assembly));
-    }
-
-    public class GraphQLUserContext : Dictionary<string, object>
-    {
-        public ClaimsPrincipal User { get; set; }
     }
 }

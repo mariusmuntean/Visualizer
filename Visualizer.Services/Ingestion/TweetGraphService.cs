@@ -1,4 +1,5 @@
 using NRedisGraph;
+using Tweetinvi.Core.Extensions;
 using Tweetinvi.Events.V2;
 using Visualizer.Services.Extensions;
 
@@ -109,6 +110,56 @@ public class TweetGraphService
         return graphResult;
     }
 
+    public async Task<GraphResult> GetMentions(MentionFilterDto mentionFilterDto)
+    {
+        var (authorUserName, mentionedUserNames, amount) = mentionFilterDto;
+        var queryUsers = (string.IsNullOrWhiteSpace(authorUserName), mentionedUserNames.IsNullOrEmpty()) switch
+        {
+            (true, true) => $"match (a:user)-[r:mentioned]->(b:user) return a,b,r LIMIT {amount}",
+            (false, true) => $"match (a:user {{ {nameof(UserNode.UserName)} : '{authorUserName}' }})-[r:mentioned]->(b:user) return a,b,r LIMIT {amount} ",
+            (true, false) => $"match (a:user)-[r:mentioned]->(b:user {{ {nameof(UserNode.UserName)} : '{mentionedUserNames.First()}' }}) return a,b,r LIMIT {amount} ",
+            (false, false) =>
+                $"match (a:user {{ {nameof(UserNode.UserName)} : '{authorUserName}' }})-[r:mentioned]->(b:user {{ {nameof(UserNode.UserName)} : '{mentionedUserNames.First()}' }}) return a,b,r LIMIT {amount} ",
+        };
+
+        Console.WriteLine(queryUsers);
+        var queryUsersResult = await _redisGraph.QueryAsync("users", queryUsers);
+        var records = queryUsersResult.ToList();
+
+        var graphResult = new GraphResult {Nodes = new Dictionary<string, UserNode>(), Edges = new HashSet<MentionRelationship>()};
+        foreach (var record in records)
+        {
+            var nodes = record.Values.OfType<Node>().ToArray();
+            if (!nodes.Any())
+            {
+                continue;
+            }
+
+            var firstNode = nodes.First();
+            var firstUserNode = firstNode.ToUserNode();
+            var idA = firstUserNode.UserId;
+
+            if (!graphResult.Nodes.ContainsKey(idA))
+            {
+                graphResult.Nodes.Add(idA, firstUserNode);
+            }
+
+            var secondNode = nodes.Skip(1).First();
+            var secondUserNode = secondNode.ToUserNode();
+            var idB = secondUserNode.UserId;
+
+            if (!graphResult.Nodes.ContainsKey(idB))
+            {
+                graphResult.Nodes.Add(idB, secondUserNode);
+            }
+
+            var relationship = record.Values.OfType<Edge>().ToArray().Single();
+            graphResult.Edges.Add(relationship.ToMentionRelationship(idA, idB));
+        }
+
+        return graphResult;
+    }
+
     public class GraphResult
     {
         public Dictionary<string, UserNode> Nodes { get; set; }
@@ -125,4 +176,18 @@ public class TweetGraphService
     }
 
     public record MentionRelationship(string FromUserId, string ToUserId, string TweetId, MentionRelationshipType RelationshipType);
+
+    public class MentionFilterDto
+    {
+        public string? AuthorUserName { get; set; }
+        public string[]? MentionedUserNames { get; set; }
+        public int Amount { get; set; }
+
+        public void Deconstruct(out string? authorUserName, out string[]? mentionedUserNames, out int amount)
+        {
+            authorUserName = this.AuthorUserName;
+            mentionedUserNames = this.MentionedUserNames;
+            amount = this.Amount;
+        }
+    }
 }

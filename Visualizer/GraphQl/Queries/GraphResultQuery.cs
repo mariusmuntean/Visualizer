@@ -21,5 +21,20 @@ public class GraphResultQuery : ObjectGraphType
                 var graphResult = await tweetGraphService.GetNodes(amount);
                 return graphResult;
             });
+
+        FieldAsync<GraphResultTypeQl>("mentions",
+            arguments: new QueryArguments(
+                new QueryArgument<NonNullGraphType<MentionFilterInputTypeQl>>
+                {
+                    Name = "filter",
+                    DefaultValue = new TweetGraphService.MentionFilterDto{Amount = 400, AuthorUserName = null, MentionedUserNames = null}
+                }
+            ),
+            resolve: async context =>
+            {
+                var mentionFilterDto = context.GetArgument<TweetGraphService.MentionFilterDto>("filter");
+                var graphResult = await tweetGraphService.GetMentions(mentionFilterDto);
+                return graphResult;
+            });
     }
 }

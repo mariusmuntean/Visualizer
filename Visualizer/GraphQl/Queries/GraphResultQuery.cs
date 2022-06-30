@@ -27,7 +27,7 @@ public class GraphResultQuery : ObjectGraphType
                 new QueryArgument<NonNullGraphType<MentionFilterInputTypeQl>>
                 {
                     Name = "filter",
-                    DefaultValue = new TweetGraphService.MentionFilterDto{Amount = 400, AuthorUserName = null, MentionedUserNames = null}
+                    DefaultValue = new TweetGraphService.MentionFilterDto{Amount = 400, AuthorUserName = null, MentionedUserNames = null, MinHops = 1, MaxHops = 10}
                 }
             ),
             resolve: async context =>

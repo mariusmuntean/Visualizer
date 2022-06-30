@@ -2,6 +2,7 @@ using NRedisGraph;
 using Tweetinvi.Core.Extensions;
 using Tweetinvi.Events.V2;
 using Visualizer.Services.Extensions;
+using Path = NRedisGraph.Path;
 
 namespace Visualizer.Services.Ingestion;
 
@@ -112,14 +113,14 @@ public class TweetGraphService
 
     public async Task<GraphResult> GetMentions(MentionFilterDto mentionFilterDto)
     {
-        var (authorUserName, mentionedUserNames, amount) = mentionFilterDto;
+        var (authorUserName, mentionedUserNames, amount, minHops, maxHops) = mentionFilterDto;
         var queryUsers = (string.IsNullOrWhiteSpace(authorUserName), mentionedUserNames.IsNullOrEmpty()) switch
         {
-            (true, true) => $"match (a:user)-[r:mentioned]->(b:user) return a,b,r LIMIT {amount}",
-            (false, true) => $"match (a:user {{ {nameof(UserNode.UserName)} : '{authorUserName}' }})-[r:mentioned]->(b:user) return a,b,r LIMIT {amount} ",
-            (true, false) => $"match (a:user)-[r:mentioned]->(b:user {{ {nameof(UserNode.UserName)} : '{mentionedUserNames.First()}' }}) return a,b,r LIMIT {amount} ",
+            (true, true) => $"match p=(a:user)-[r:mentioned*1..1]->(b:user) return p LIMIT {amount}",
+            (false, true) => $"match p=(a:user {{ {nameof(UserNode.UserName)} : '{authorUserName}' }})-[r:mentioned*{minHops}..{maxHops}]->(b:user) return p LIMIT {amount} ",
+            (true, false) => $"match p=(a:user)-[r:mentioned*{minHops}..{maxHops}]->(b:user {{ {nameof(UserNode.UserName)} : '{mentionedUserNames.First()}' }}) return p LIMIT {amount} ",
             (false, false) =>
-                $"match (a:user {{ {nameof(UserNode.UserName)} : '{authorUserName}' }})-[r:mentioned]->(b:user {{ {nameof(UserNode.UserName)} : '{mentionedUserNames.First()}' }}) return a,b,r LIMIT {amount} ",
+                $"match p = (a:user {{ {nameof(UserNode.UserName)} : '{authorUserName}' }})-[r:mentioned*{minHops}..{maxHops}]->(b:user {{ {nameof(UserNode.UserName)} : '{mentionedUserNames.First()}' }}) return p LIMIT {amount} ",
         };
 
         Console.WriteLine(queryUsers);
@@ -129,32 +130,64 @@ public class TweetGraphService
         var graphResult = new GraphResult {Nodes = new Dictionary<string, UserNode>(), Edges = new HashSet<MentionRelationship>()};
         foreach (var record in records)
         {
-            var nodes = record.Values.OfType<Node>().ToArray();
-            if (!nodes.Any())
+            var paths = record.Values.OfType<Path>().ToArray();
+            foreach (var path in paths)
             {
-                continue;
+                var nodesArr = path.Nodes.ToArray();
+                var edgesArr = path.Edges.ToArray();
+                Node prevNode = null;
+                for (var i = 0; i < nodesArr.Length; i++)
+                {
+                    var currentNode = nodesArr[i];
+                    var currentUserNode = currentNode.ToUserNode();
+                    var currentUserId = currentUserNode.UserId;
+                    if (!graphResult.Nodes.ContainsKey(currentUserId))
+                    {
+                        graphResult.Nodes.Add(currentUserId, currentUserNode);
+                    }
+
+                    if (prevNode is not null)
+                    {
+                        var prevUserNode = prevNode.ToUserNode();
+                        var prevUserId = prevUserNode.UserId;
+                        var edge = edgesArr.First(e => e.Source == prevNode.Id && e.Destination == currentNode.Id);
+                        if (edge is not null)
+                        {
+                            graphResult.Edges.Add(edge.ToMentionRelationship(prevUserId, currentUserId));
+                        }
+                    }
+
+                    prevNode = currentNode;
+                }
             }
-
-            var firstNode = nodes.First();
-            var firstUserNode = firstNode.ToUserNode();
-            var idA = firstUserNode.UserId;
-
-            if (!graphResult.Nodes.ContainsKey(idA))
-            {
-                graphResult.Nodes.Add(idA, firstUserNode);
-            }
-
-            var secondNode = nodes.Skip(1).First();
-            var secondUserNode = secondNode.ToUserNode();
-            var idB = secondUserNode.UserId;
-
-            if (!graphResult.Nodes.ContainsKey(idB))
-            {
-                graphResult.Nodes.Add(idB, secondUserNode);
-            }
-
-            var relationship = record.Values.OfType<Edge>().ToArray().Single();
-            graphResult.Edges.Add(relationship.ToMentionRelationship(idA, idB));
+            
+            
+            // var nodes = record.Values.OfType<Node>().ToArray();
+            // if (!nodes.Any())
+            // {
+            //     continue;
+            // }
+            //
+            // var firstNode = nodes.First();
+            // var firstUserNode = firstNode.ToUserNode();
+            // var idA = firstUserNode.UserId;
+            //
+            // if (!graphResult.Nodes.ContainsKey(idA))
+            // {
+            //     graphResult.Nodes.Add(idA, firstUserNode);
+            // }
+            //
+            // var secondNode = nodes.Skip(1).First();
+            // var secondUserNode = secondNode.ToUserNode();
+            // var idB = secondUserNode.UserId;
+            //
+            // if (!graphResult.Nodes.ContainsKey(idB))
+            // {
+            //     graphResult.Nodes.Add(idB, secondUserNode);
+            // }
+            //
+            // var relationship = record.Values.OfType<Edge>().ToArray().Single();
+            // graphResult.Edges.Add(relationship.ToMentionRelationship(idA, idB));
         }
 
         return graphResult;
@@ -183,11 +216,16 @@ public class TweetGraphService
         public string[]? MentionedUserNames { get; set; }
         public int Amount { get; set; }
 
-        public void Deconstruct(out string? authorUserName, out string[]? mentionedUserNames, out int amount)
+        public int MinHops { get; set; } = 1;
+        public int MaxHops { get; set; } = 10;
+
+        public void Deconstruct(out string? authorUserName, out string[]? mentionedUserNames, out int amount, out int minHops, out int maxHops)
         {
-            authorUserName = this.AuthorUserName;
-            mentionedUserNames = this.MentionedUserNames;
-            amount = this.Amount;
+            authorUserName = AuthorUserName;
+            mentionedUserNames = MentionedUserNames;
+            amount = Amount;
+            minHops = MinHops;
+            maxHops = MaxHops;
         }
     }
 }

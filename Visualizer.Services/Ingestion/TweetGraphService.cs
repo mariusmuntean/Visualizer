@@ -77,7 +77,7 @@ public class TweetGraphService
         var queryUsersResult = await _redisGraph.QueryAsync("users", queryUsers);
         var records = queryUsersResult.ToList();
 
-        var graphResult = new GraphResult {Nodes = new Dictionary<string, UserNode>(), Edges = new HashSet<MentionRelationship>()};
+        var graphResult = new GraphResult { Nodes = new Dictionary<string, UserNode>(), Edges = new HashSet<MentionRelationship>() };
         foreach (var record in records)
         {
             var nodes = record.Values.OfType<Node>().ToArray();
@@ -114,9 +114,13 @@ public class TweetGraphService
     public async Task<GraphResult> GetMentions(MentionFilterDto mentionFilterDto)
     {
         var (authorUserName, mentionedUserNames, amount, minHops, maxHops) = mentionFilterDto;
+        if (minHops > maxHops)
+        {
+            return new GraphResult();
+        }
         var queryUsers = (string.IsNullOrWhiteSpace(authorUserName), mentionedUserNames.IsNullOrEmpty()) switch
         {
-            (true, true) => $"match p=(a:user)-[r:mentioned*1..1]->(b:user) return p LIMIT {amount}",
+            (true, true) => $"match p=(a:user)-[r:mentioned*{minHops}..{maxHops}]->(b:user) return p LIMIT {amount}",
             (false, true) => $"match p=(a:user {{ {nameof(UserNode.UserName)} : '{authorUserName}' }})-[r:mentioned*{minHops}..{maxHops}]->(b:user) return p LIMIT {amount} ",
             (true, false) => $"match p=(a:user)-[r:mentioned*{minHops}..{maxHops}]->(b:user {{ {nameof(UserNode.UserName)} : '{mentionedUserNames.First()}' }}) return p LIMIT {amount} ",
             (false, false) =>
@@ -127,7 +131,7 @@ public class TweetGraphService
         var queryUsersResult = await _redisGraph.QueryAsync("users", queryUsers);
         var records = queryUsersResult.ToList();
 
-        var graphResult = new GraphResult {Nodes = new Dictionary<string, UserNode>(), Edges = new HashSet<MentionRelationship>()};
+        var graphResult = new GraphResult();
         foreach (var record in records)
         {
             var paths = record.Values.OfType<Path>().ToArray();
@@ -150,7 +154,7 @@ public class TweetGraphService
                     {
                         var prevUserNode = prevNode.ToUserNode();
                         var prevUserId = prevUserNode.UserId;
-                        var edge = edgesArr.First(e => e.Source == prevNode.Id && e.Destination == currentNode.Id);
+                        var edge = Array.Find(edgesArr, e => e.Source == prevNode.Id && e.Destination == currentNode.Id);
                         if (edge is not null)
                         {
                             graphResult.Edges.Add(edge.ToMentionRelationship(prevUserId, currentUserId));
@@ -160,8 +164,8 @@ public class TweetGraphService
                     prevNode = currentNode;
                 }
             }
-            
-            
+
+
             // var nodes = record.Values.OfType<Node>().ToArray();
             // if (!nodes.Any())
             // {
@@ -195,9 +199,9 @@ public class TweetGraphService
 
     public class GraphResult
     {
-        public Dictionary<string, UserNode> Nodes { get; set; }
+        public Dictionary<string, UserNode> Nodes { get; set; } = new Dictionary<string, UserNode>();
 
-        public HashSet<MentionRelationship> Edges { get; set; }
+        public HashSet<MentionRelationship> Edges { get; set; } = new HashSet<MentionRelationship>();
     }
 
     public record UserNode(string UserId, string UserName);

@@ -1,9 +1,10 @@
 using GraphQL.Types;
 using Visualizer.Services.Ingestion;
+using static Visualizer.Services.Ingestion.TweetGraphService;
 
 namespace Visualizer.GraphQl.Types;
 
-public class GraphResultTypeQl : ObjectGraphType<TweetGraphService.GraphResult>
+public class GraphResultTypeQl : ObjectGraphType<GraphResult>
 {
     public GraphResultTypeQl()
     {
@@ -14,10 +15,20 @@ public class GraphResultTypeQl : ObjectGraphType<TweetGraphService.GraphResult>
         Field(nameof(TweetGraphService.GraphResult.Edges),
             result => result.Edges.ToArray(),
             false, typeof(ListGraphType<MentionRelationshipTypeQl>));
+
+        Field(result => result.Statistics, true, typeof(GraphResultStatisticsTypeQl));
     }
 }
 
-public class UserNodeTypeQl : ObjectGraphType<TweetGraphService.UserNode>
+public class GraphResultStatisticsTypeQl : ObjectGraphType<GraphResultStatistics>
+{
+    public GraphResultStatisticsTypeQl()
+    {
+        Field(nameof(GraphResultStatistics.QueryInternalExecutionTime), stats => stats.QueryInternalExecutionTime, nullable: true, typeof(StringGraphType));
+    }
+}
+
+public class UserNodeTypeQl : ObjectGraphType<UserNode>
 {
     public UserNodeTypeQl()
     {
@@ -26,13 +37,13 @@ public class UserNodeTypeQl : ObjectGraphType<TweetGraphService.UserNode>
     }
 }
 
-public class MentionRelationshipTypeQl : ObjectGraphType<TweetGraphService.MentionRelationship>
+public class MentionRelationshipTypeQl : ObjectGraphType<MentionRelationship>
 {
     public MentionRelationshipTypeQl()
     {
         Field(graphEdge => graphEdge.FromUserId, false);
         Field(graphEdge => graphEdge.ToUserId, false);
         Field(graphEdge => graphEdge.TweetId, false);
-        Field(graphEdge => graphEdge.RelationshipType, false, typeof(EnumerationGraphType<TweetGraphService.MentionRelationshipType>));
+        Field(graphEdge => graphEdge.RelationshipType, false, typeof(EnumerationGraphType<MentionRelationshipType>));
     }
 }

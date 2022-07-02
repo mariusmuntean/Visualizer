@@ -131,7 +131,7 @@ public class TweetGraphService
         var queryUsersResult = await _redisGraph.QueryAsync("users", queryUsers);
         var records = queryUsersResult.ToList();
 
-        var graphResult = new GraphResult();
+        var graphResult = new GraphResult() { Statistics = new GraphResultStatistics(QueryInternalExecutionTime: queryUsersResult.Statistics.QueryInternalExecutionTime) };
         foreach (var record in records)
         {
             var paths = record.Values.OfType<Path>().ToArray();
@@ -202,7 +202,11 @@ public class TweetGraphService
         public Dictionary<string, UserNode> Nodes { get; set; } = new Dictionary<string, UserNode>();
 
         public HashSet<MentionRelationship> Edges { get; set; } = new HashSet<MentionRelationship>();
+
+        public GraphResultStatistics? Statistics { get; set; }
     }
+
+    public record GraphResultStatistics(string QueryInternalExecutionTime);
 
     public record UserNode(string UserId, string UserName);
 

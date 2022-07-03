@@ -1,4 +1,5 @@
-﻿using Tweetinvi;
+﻿using Newtonsoft.Json;
+using Tweetinvi;
 using Tweetinvi.Parameters.V2;
 using Tweetinvi.Streaming.V2;
 
@@ -59,8 +60,8 @@ public class TwitterStreamService
             parameters.Expansions.Add("referenced_tweets.id");
             parameters.PlaceFields.Add("geo");
             parameters.TweetFields.Add("geo");
+            Console.WriteLine($"Starting streaming with parameters: {JsonConvert.SerializeObject(parameters, Formatting.Indented)}");
             await _sampleStream.StartAsync(parameters);
-            Console.WriteLine("Started streaming");
         }
         catch (Exception e)
         {

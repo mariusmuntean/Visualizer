@@ -111,6 +111,16 @@ public class TweetGraphService
         return graphResult;
     }
 
+    public async Task<long> CountUsers()
+    {
+        var query = "match (u:user) return count(u)";
+        var countUsersQueryResult = await _redisGraph.QueryAsync("users", query);
+        var records = countUsersQueryResult.ToList();
+
+        object? maybeCount = records.FirstOrDefault()?.Values.FirstOrDefault();
+        return maybeCount is null ? 0 : (long)maybeCount;
+    }
+
     public async Task<GraphResult> GetMentions(MentionFilterDto mentionFilterDto)
     {
         var (authorUserName, mentionedUserNames, amount, minHops, maxHops) = mentionFilterDto;

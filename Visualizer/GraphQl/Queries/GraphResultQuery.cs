@@ -13,7 +13,7 @@ public class GraphResultQuery : ObjectGraphType
 
         FieldAsync<GraphResultTypeQl>("graphResults",
             arguments: new QueryArguments(
-                new QueryArgument<IntGraphType> {Name = "amount", DefaultValue = 10}
+                new QueryArgument<IntGraphType> { Name = "amount", DefaultValue = 10 }
             ),
             resolve: async context =>
             {
@@ -27,7 +27,7 @@ public class GraphResultQuery : ObjectGraphType
                 new QueryArgument<NonNullGraphType<MentionFilterInputTypeQl>>
                 {
                     Name = "filter",
-                    DefaultValue = new TweetGraphService.MentionFilterDto{Amount = 400, AuthorUserName = null, MentionedUserNames = null, MinHops = 1, MaxHops = 10}
+                    DefaultValue = new TweetGraphService.MentionFilterDto { Amount = 400, AuthorUserName = null, MentionedUserNames = null, MinHops = 1, MaxHops = 10 }
                 }
             ),
             resolve: async context =>
@@ -35,6 +35,13 @@ public class GraphResultQuery : ObjectGraphType
                 var mentionFilterDto = context.GetArgument<TweetGraphService.MentionFilterDto>("filter");
                 var graphResult = await tweetGraphService.GetMentions(mentionFilterDto);
                 return graphResult;
+            });
+
+        FieldAsync<LongGraphType>("userCount",
+            resolve: async context =>
+            {
+                var userCount = await tweetGraphService.CountUsers();
+                return userCount;
             });
     }
 }

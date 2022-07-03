@@ -1,4 +1,5 @@
 ﻿using Tweetinvi;
+using Tweetinvi.Parameters.V2;
 using Tweetinvi.Streaming.V2;
 
 namespace Visualizer.Services.Ingestion;
@@ -52,7 +53,15 @@ public class TwitterStreamService
 
         try
         {
-            await _sampleStream.StartAsync();
+            // await _sampleStream.StartAsync();
+
+            // Docs: https://developer.twitter.com/en/docs/twitter-api/tweets/volume-streams/api-reference/get-tweets-sample-stream#tab1
+            StartSampleStreamV2Parameters parameters = new StartSampleStreamV2Parameters();
+            parameters.Expansions.Add("geo.place_id");
+            parameters.Expansions.Add("referenced_tweets.id");
+            parameters.PlaceFields.Add("geo");
+            parameters.TweetFields.Add("geo");
+            await _sampleStream.StartAsync(parameters);
             Console.WriteLine("Started streaming");
         }
         catch (Exception e)

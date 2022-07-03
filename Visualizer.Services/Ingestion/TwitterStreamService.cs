@@ -53,8 +53,6 @@ public class TwitterStreamService
 
         try
         {
-            // await _sampleStream.StartAsync();
-
             // Docs: https://developer.twitter.com/en/docs/twitter-api/tweets/volume-streams/api-reference/get-tweets-sample-stream#tab1
             StartSampleStreamV2Parameters parameters = new StartSampleStreamV2Parameters();
             parameters.Expansions.Add("geo.place_id");

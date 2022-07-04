@@ -9,6 +9,7 @@ using Visualizer.Extensions;
 using Visualizer.GraphQl;
 using Visualizer.HostedServices;
 using Visualizer.Model;
+using Visualizer.Model.TweetDb;
 
 const string MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
@@ -74,7 +75,7 @@ TypeAdapterConfig<DateTimeOffset, DateTime>.NewConfig()
 TypeAdapterConfig<Tweet, TweetModel>.NewConfig()
     .Map(dest => dest.Id, src => src.Id)
     // .Map(dest => dest.CreatedAt, src => src.CreatedAt.DateTime)
-    .Map(dest => dest.GeoLoc, src => new GeoLoc(src.Coordinates.Latitude, src.Coordinates.Longitude))
+    .Map(dest => dest.GeoLoc, src => new GeoLoc(src.Coordinates.Longitude, src.Coordinates.Latitude))
     ;
 
 // global cors policy

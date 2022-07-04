@@ -1,5 +1,5 @@
 using Redis.OM;
-using Visualizer.Model;
+using Visualizer.Model.TweetDb;
 
 namespace Visualizer.HostedServices;
 

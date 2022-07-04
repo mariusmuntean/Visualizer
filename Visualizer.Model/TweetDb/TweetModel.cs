@@ -21,7 +21,7 @@ public class TweetModel
     /// <summary>
     /// The actual UTF-8 text of the Tweet.
     /// </summary>
-    [Searchable(PhoneticMatcher = "true")]
+    [Searchable(PhoneticMatcher = "dm:en")] // src https://github.com/redis/redis-om-node/blob/main/README.md
     public string Text { get; set; }
 
     [Indexed]

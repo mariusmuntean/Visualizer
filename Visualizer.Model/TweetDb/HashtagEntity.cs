@@ -26,6 +26,7 @@ public class HashtagEntity
     [Indexed]
     public string Hashtag
     {
+        get => Tag;
         set => Tag = value;
     }
 }

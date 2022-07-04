@@ -21,6 +21,7 @@ public class VisualizerSchema : Schema
         public VisualizerQuery()
         {
             Name = nameof(VisualizerQuery);
+            Field<TweetQuery>("tweet", resolve: context => new { });
             Field<HashtagQuery>("hashtag", resolve: context => new { });
             Field<GraphResultQuery>("graphResult", resolve: context => new { });
             Field<StreamingQuery>("streaming", resolve: context => new { });

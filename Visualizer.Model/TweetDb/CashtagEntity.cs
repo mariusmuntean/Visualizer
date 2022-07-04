@@ -26,9 +26,7 @@ public class CashtagEntity
     [Indexed]
     private string Cashtag
     {
-        set
-        {
-            Tag = value;
-        }
+        get => Tag;
+        set => Tag = value;
     }
 }

@@ -1,3 +1,4 @@
+using System.Linq;
 using Microsoft.Extensions.Logging;
 using Redis.OM;
 using Visualizer.Model.TweetDb;
@@ -19,7 +20,8 @@ public class TweetDbQueryService
     public List<TweetModel> FindTweets(FindTweetsInputDto inputDto)
     {
         var tweetCollection = _redisConnectionProvider.RedisCollection<TweetModel>();
-        var queryableTweetCollection = tweetCollection.AsQueryable();
+        // var queryableTweetCollection = tweetCollection.AsQueryable();
+        var queryableTweetCollection = tweetCollection;
 
         var pageSize = inputDto.PageSize ?? 100;
         var pageNumber = inputDto.PageNumber ?? 0;
@@ -46,10 +48,13 @@ public class TweetDbQueryService
             queryableTweetCollection = queryableTweetCollection.Where(tweet => tweet.CreatedAt <= inputDto.UpTo);
         }
 
-        if (inputDto.Hashtags is not null)
-        {
-            // queryableTweetCollection = queryableTweetCollection.Where(tweet => tweet.Entities.Hashtags.Contains());
-        }
+        // if (inputDto.Hashtags is not null && inputDto.Hashtags.Any())
+        // {
+        //     foreach (var requiredHashtag in inputDto.Hashtags)
+        //     {
+        //         queryableTweetCollection = queryableTweetCollection.Where(tweet => tweet.Entities.Hashtags.Any(ht => ht.Hashtag == requiredHashtag));
+        //     }
+        // }
 
         if (inputDto.SearchTerm is not null)
         {

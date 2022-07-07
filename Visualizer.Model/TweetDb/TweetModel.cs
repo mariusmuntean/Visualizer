@@ -49,6 +49,12 @@ public class TweetModel
     public string Source { get; set; }
 
     /// <summary>
+    /// Entities which have been parsed out of the text of the Tweet.
+    /// </summary>
+    [Indexed(CascadeDepth = 2)]
+    public TweetEntities Entities { get; set; }
+
+    /// <summary>
     /// Engagement metrics, tracked in an organic context, for the Tweet at the time of the request.
     /// </summary>
     [Indexed(CascadeDepth = 1)]
@@ -59,10 +65,4 @@ public class TweetModel
     /// </summary>
     [Indexed(CascadeDepth = 1)]
     public ReferencedTweet[] ReferencedTweets { get; set; }
-
-    /// <summary>
-    /// Entities which have been parsed out of the text of the Tweet.
-    /// </summary>
-    [Indexed(CascadeDepth = 2)]
-    public TweetEntities Entities { get; set; }
 }

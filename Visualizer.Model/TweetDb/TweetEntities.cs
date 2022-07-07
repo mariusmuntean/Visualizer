@@ -9,18 +9,24 @@ public class TweetEntities
     /// Cashtags found in the tweet. A cashtag is a company ticker symbol preceded by
     /// the U.S. dollar sign, e.g. $TWTR.
     /// </summary>
-    [Indexed(CascadeDepth = 1)]
-    public CashtagEntity[] Cashtags { get; set; }
+    // [Indexed]
+    // public CashtagEntity[] Cashtags { get; set; }
+    [Indexed]
+    public string[] Cashtags { get; set; }
 
     /// <summary>
     /// Hashtags found in the tweet.
     /// </summary>
-    [Indexed(CascadeDepth = 1)]
-    public HashtagEntity[] Hashtags { get; set; }
+    // [Indexed]
+    // public HashtagEntity[] Hashtags { get; set; }
+    [Indexed]
+    public string[] Hashtags { get; set; }
 
     /// <summary>
     ///  Mentions found in the tweet.
     /// </summary>
-    [Indexed(CascadeDepth = 1)]
-    public UserMention[] Mentions { get; set; }
+    // [Indexed]
+    // public UserMention[] Mentions { get; set; }
+    [Indexed]
+    public string[] Mentions { get; set; }
 }

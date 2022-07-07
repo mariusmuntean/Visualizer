@@ -1,6 +1,8 @@
 using System.Linq;
+using System.Linq.Expressions;
 using Microsoft.Extensions.Logging;
 using Redis.OM;
+using Redis.OM.Searching;
 using Visualizer.Model.TweetDb;
 
 namespace Visualizer.Services.Query;
@@ -20,48 +22,53 @@ public class TweetDbQueryService
     public List<TweetModel> FindTweets(FindTweetsInputDto inputDto)
     {
         var tweetCollection = _redisConnectionProvider.RedisCollection<TweetModel>();
-        // var queryableTweetCollection = tweetCollection.AsQueryable();
-        var queryableTweetCollection = tweetCollection;
 
         var pageSize = inputDto.PageSize ?? 100;
         var pageNumber = inputDto.PageNumber ?? 0;
-        queryableTweetCollection = queryableTweetCollection.Skip(pageSize * pageNumber);
-        queryableTweetCollection = queryableTweetCollection.Take(pageSize);
+        tweetCollection = tweetCollection.Skip(pageSize * pageNumber);
+        tweetCollection = tweetCollection.Take(pageSize);
 
         if (inputDto.TweetId is not null)
         {
-            queryableTweetCollection = queryableTweetCollection.Where(tweet => tweet.Id == inputDto.TweetId);
+            tweetCollection = tweetCollection.Where(tweet => tweet.Id == inputDto.TweetId);
         }
 
         if (inputDto.AuthorId is not null)
         {
-            queryableTweetCollection = queryableTweetCollection.Where(tweet => tweet.AuthorId == inputDto.AuthorId);
+
+            // ToDo: build expression like here https://stackoverflow.com/a/8315901
+            tweetCollection = tweetCollection.Where(tweet => tweet.AuthorId == inputDto.AuthorId && tweet.Text == inputDto.SearchTerm);
+            // ToDo #2: open issue about using multiple Where clauses
+
+            // }
+
+            // if (inputDto.SearchTerm is not null)
+            // {
+            // tweetCollection = tweetCollection.Where(tweet => tweet.Text == inputDto.SearchTerm);
         }
 
         if (inputDto.StartingFrom is not null)
         {
-            queryableTweetCollection = queryableTweetCollection.Where(tweet => tweet.CreatedAt >= inputDto.StartingFrom);
+            tweetCollection = tweetCollection.Where(tweet => tweet.CreatedAt >= inputDto.StartingFrom);
         }
 
         if (inputDto.UpTo is not null)
         {
-            queryableTweetCollection = queryableTweetCollection.Where(tweet => tweet.CreatedAt <= inputDto.UpTo);
+            tweetCollection = tweetCollection.Where(tweet => tweet.CreatedAt <= inputDto.UpTo);
         }
 
-        // if (inputDto.Hashtags is not null && inputDto.Hashtags.Any())
-        // {
-        //     foreach (var requiredHashtag in inputDto.Hashtags)
-        //     {
-        //         queryableTweetCollection = queryableTweetCollection.Where(tweet => tweet.Entities.Hashtags.Any(ht => ht.Hashtag == requiredHashtag));
-        //     }
-        // }
-
-        if (inputDto.SearchTerm is not null)
+        if (inputDto.Hashtags is not null && inputDto.Hashtags.Length > 0)
         {
-            queryableTweetCollection = queryableTweetCollection.Where(tweet => tweet.Text == inputDto.SearchTerm);
+            // workaround until the PR is merged https://github.com/redis/redis-om-dotnet/pull/151
+
+            foreach (var requiredHashtag in inputDto.Hashtags)
+            {
+
+                tweetCollection = tweetCollection.Where(tweet => tweet.Entities.Hashtags.Contains(requiredHashtag));
+            }
         }
 
-        return queryableTweetCollection.ToList();
+        return tweetCollection.ToList();
     }
 }
 

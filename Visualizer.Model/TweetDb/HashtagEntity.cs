@@ -20,7 +20,7 @@ public class HashtagEntity
     /// <summary>
     /// The text of the Hashtag.
     /// </summary>
-    [Indexed]
+    [Searchable]
     public string Tag { get; set; }
 
     [Indexed]

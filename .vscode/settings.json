@@ -4,6 +4,8 @@
     "**/obj": true
   },
   "workbench.colorCustomizations": {
-    "editorCursor.foreground": "#ffffff"
+    "[One Dark Pro Italic Vivid]": {
+      "editorCursor.foreground": "#ffffff"
+    }
   }
 }

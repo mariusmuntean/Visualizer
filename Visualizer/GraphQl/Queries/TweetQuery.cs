@@ -12,14 +12,14 @@ public class TweetQuery : ObjectGraphType
     {
         var tweetDbQueryService = provider.CreateScope().ServiceProvider.GetService<TweetDbQueryService>();
 
-        Field<ListGraphType<TweetTypeQl>>("find",
+        FieldAsync<ListGraphType<TweetTypeQl>>("find",
         arguments: new QueryArguments(
             new QueryArgument<FindTweetsInputTypeQl>() { Name = "filter" }
         ),
-        resolve: context =>
+        resolve: async context =>
             {
                 var filter = context.GetArgument<FindTweetsInputDto>("filter");
-                var tweets = tweetDbQueryService!.FindTweets(filter);
+                var tweets = await tweetDbQueryService!.FindTweetsWithExpression(filter);
                 Console.WriteLine(JsonConvert.SerializeObject(tweets));
                 return tweets;
             });

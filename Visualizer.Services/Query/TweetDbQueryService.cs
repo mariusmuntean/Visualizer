@@ -1,15 +1,12 @@
-using System.Linq;
 using System.Linq.Expressions;
 using Microsoft.Extensions.Logging;
 using Redis.OM;
-using Redis.OM.Searching;
 using Visualizer.Model.TweetDb;
 
 namespace Visualizer.Services.Query;
 
 public class TweetDbQueryService
 {
-
     private readonly RedisConnectionProvider _redisConnectionProvider;
     private readonly ILogger<TweetDbQueryService> _logger;
 
@@ -19,14 +16,9 @@ public class TweetDbQueryService
         _logger = logger;
     }
 
-    public List<TweetModel> FindTweets(FindTweetsInputDto inputDto)
+    public async Task<List<TweetModel>> FindTweets(FindTweetsInputDto inputDto)
     {
         var tweetCollection = _redisConnectionProvider.RedisCollection<TweetModel>();
-
-        var pageSize = inputDto.PageSize ?? 100;
-        var pageNumber = inputDto.PageNumber ?? 0;
-        tweetCollection = tweetCollection.Skip(pageSize * pageNumber);
-        tweetCollection = tweetCollection.Take(pageSize);
 
         if (inputDto.TweetId is not null)
         {
@@ -35,40 +27,95 @@ public class TweetDbQueryService
 
         if (inputDto.AuthorId is not null)
         {
+            tweetCollection = tweetCollection.Where(tweet => tweet.AuthorId == inputDto.AuthorId);
+        }
 
-            // ToDo: build expression like here https://stackoverflow.com/a/8315901
-            tweetCollection = tweetCollection.Where(tweet => tweet.AuthorId == inputDto.AuthorId && tweet.Text == inputDto.SearchTerm);
-            // ToDo #2: open issue about using multiple Where clauses
-
-            // }
-
-            // if (inputDto.SearchTerm is not null)
-            // {
-            // tweetCollection = tweetCollection.Where(tweet => tweet.Text == inputDto.SearchTerm);
+        if (inputDto.SearchTerm is not null)
+        {
+            tweetCollection = tweetCollection.Where(tweet => tweet.Text == inputDto.SearchTerm);
         }
 
         if (inputDto.StartingFrom is not null)
         {
-            tweetCollection = tweetCollection.Where(tweet => tweet.CreatedAt >= inputDto.StartingFrom);
+            var startingFromTicks = inputDto.StartingFrom.Value.ToUniversalTime().Ticks;
+            tweetCollection = tweetCollection.Where(tweet => tweet.CreatedAt >= startingFromTicks);
         }
 
         if (inputDto.UpTo is not null)
         {
-            tweetCollection = tweetCollection.Where(tweet => tweet.CreatedAt <= inputDto.UpTo);
+            var upToTicks = inputDto.UpTo.Value.ToUniversalTime().Ticks;
+            tweetCollection = tweetCollection.Where(tweet => tweet.CreatedAt <= upToTicks);
         }
 
         if (inputDto.Hashtags is not null && inputDto.Hashtags.Length > 0)
         {
-            // workaround until the PR is merged https://github.com/redis/redis-om-dotnet/pull/151
-
             foreach (var requiredHashtag in inputDto.Hashtags)
             {
-
                 tweetCollection = tweetCollection.Where(tweet => tweet.Entities.Hashtags.Contains(requiredHashtag));
             }
         }
 
-        return tweetCollection.ToList();
+        var pageSize = inputDto.PageSize ?? 100;
+        var pageNumber = inputDto.PageNumber ?? 0;
+        tweetCollection = tweetCollection.Skip(pageSize * pageNumber).Take(pageSize);
+
+        var tweetsIlist = await tweetCollection.ToListAsync();
+        return tweetsIlist.ToList();
+    }
+
+    public async Task<List<TweetModel>> FindTweetsWithExpression(FindTweetsInputDto inputDto)
+    {
+        var tweetCollection = _redisConnectionProvider.RedisCollection<TweetModel>();
+
+        Expression expression = null;
+
+        if (!string.IsNullOrWhiteSpace(inputDto.TweetId))
+        {
+            Expression<Func<TweetModel, bool>> filterByTweetIdExpression = tweet => tweet.Id == inputDto.TweetId;
+            expression = expression is null ? filterByTweetIdExpression.Body : Expression.AndAlso(expression, filterByTweetIdExpression.Body);
+        }
+
+        if (!string.IsNullOrWhiteSpace(inputDto.AuthorId))
+        {
+            Expression<Func<TweetModel, bool>> filterByAuthorIdExpression = tweet => tweet.AuthorId == inputDto.AuthorId;
+            expression = expression is null ? filterByAuthorIdExpression.Body : Expression.AndAlso(expression, filterByAuthorIdExpression.Body);
+        }
+
+        if (inputDto.StartingFrom is not null)
+        {
+            var startingFromTicks = inputDto.StartingFrom.Value.ToUniversalTime().Ticks;
+            Expression<Func<TweetModel, bool>> filterByStartingFromExpression = tweet => tweet.CreatedAt >= startingFromTicks;
+            expression = expression is null ? filterByStartingFromExpression.Body : Expression.AndAlso(expression, filterByStartingFromExpression.Body);
+        }
+
+        if (inputDto.UpTo is not null)
+        {
+            var upToTicks = inputDto.UpTo.Value.ToUniversalTime().Ticks;
+            Expression<Func<TweetModel, bool>> filterByUpToExpression = tweet => tweet.CreatedAt <= upToTicks;
+            expression = expression is null ? filterByUpToExpression.Body : Expression.AndAlso(expression, filterByUpToExpression.Body);
+        }
+
+        if (inputDto.Hashtags is not null && inputDto.Hashtags.Length > 0)
+        {
+            foreach (var requiredHashtag in inputDto.Hashtags)
+            {
+                Expression<Func<TweetModel, bool>> hashtagEx = tweet => tweet.Entities.Hashtags.Contains(requiredHashtag);
+                expression = expression is null ? hashtagEx.Body : Expression.AndAlso(expression, hashtagEx.Body);
+            }
+        }
+
+        var pageSize = inputDto.PageSize ?? 100;
+        var pageNumber = inputDto.PageNumber ?? 0;
+
+        expression ??= Expression.Equal(Expression.Constant(1), Expression.Constant(1));
+        _logger.LogInformation(expression.ToString());
+
+        var p = Expression.Parameter(typeof(TweetModel));
+        var whereExpression = Expression.Lambda<Func<TweetModel, bool>>(expression, new ParameterExpression[] {p});
+        tweetCollection = tweetCollection.Where(whereExpression).Skip(pageSize * pageNumber).Take(pageSize);
+
+        var tweetsIlist = await tweetCollection.ToListAsync();
+        return tweetsIlist.ToList();
     }
 }
 

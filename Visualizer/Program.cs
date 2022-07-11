@@ -75,7 +75,7 @@ TypeAdapterConfig<DateTimeOffset, DateTime>.NewConfig()
     ;
 TypeAdapterConfig<TweetV2, TweetModel>.NewConfig()
     .Map(dest => dest.Id, src => src.Id)
-    // .Map(dest => dest.CreatedAt, src => src.CreatedAt.DateTime)
+    .Map(dest => dest.CreatedAt, src => src.CreatedAt.UtcTicks)
     .Map(dest => dest.GeoLoc,
     src => new GeoLoc(src.Geo.Coordinates.Coordinates[0], src.Geo.Coordinates.Coordinates[1]),
     src => src.Geo.Coordinates != null && src.Geo.Coordinates.Coordinates != null)

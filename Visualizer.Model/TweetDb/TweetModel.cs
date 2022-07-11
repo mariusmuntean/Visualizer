@@ -27,8 +27,12 @@ public class TweetModel
     [Indexed]
     public string AuthorId { get; set; }
 
-    [Indexed]
-    public DateTime CreatedAt { get; set; }
+    /// <summary>
+    /// UTC ticks when the Tweet was created.
+    /// </summary>
+    /// <value></value>
+    [Indexed(Sortable = true)]
+    public long CreatedAt { get; set; }
 
     /// <summary>
     /// Contains details about the location tagged by the user in this Tweet, if they specified one.

@@ -93,12 +93,6 @@ public class TweetDbQueryService
             expression = expression is null ? filterBySearchTerm.Body : Expression.AndAlso(expression, filterBySearchTerm.Body);
         }
 
-        if (!string.IsNullOrWhiteSpace(inputDto.Username))
-        {
-            Expression<Func<TweetModel, bool>> filterByUsernameExpression = tweet => tweet.Username == inputDto.Username;
-            expression = expression is null ? filterByUsernameExpression.Body : Expression.AndAlso(expression, filterByUsernameExpression.Body);
-        }
-
         if (inputDto.StartingFrom is not null)
         {
             var startingFromTicks = inputDto.StartingFrom.Value.ToUniversalTime().Ticks;

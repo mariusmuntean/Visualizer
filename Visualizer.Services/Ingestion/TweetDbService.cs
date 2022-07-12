@@ -23,7 +23,7 @@ public class TweetDbService
         try
         {
             var tweetCollection = _redisConnectionProvider.RedisCollection<TweetModel>();
-            var tweetModel = tweetV2ReceivedEventArgs.Tweet.Adapt<TweetModel>();
+            var tweetModel = tweetV2ReceivedEventArgs.Adapt<TweetModel>();
             internalId = await tweetCollection.InsertAsync(tweetModel);
         }
         catch (Exception e)

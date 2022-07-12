@@ -26,6 +26,9 @@ public class TweetModel
 
     [Indexed]
     public string AuthorId { get; set; }
+    
+    [Indexed]
+    public string Username { get; set; }
 
     /// <summary>
     /// UTC ticks when the Tweet was created.

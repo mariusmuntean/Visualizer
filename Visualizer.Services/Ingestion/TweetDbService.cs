@@ -1,20 +1,23 @@
 using Mapster;
+using Microsoft.Extensions.Logging;
 using Redis.OM;
 using Tweetinvi.Events.V2;
-using Visualizer.Model;
+using Visualizer.Model.TweetDb;
 
 namespace Visualizer.Services.Ingestion;
 
 public class TweetDbService
 {
     private readonly RedisConnectionProvider _redisConnectionProvider;
+    private readonly ILogger<TweetDbService> _logger;
 
-    public TweetDbService(RedisConnectionProvider redisConnectionProvider)
+    public TweetDbService(RedisConnectionProvider redisConnectionProvider, ILogger<TweetDbService> logger)
     {
         _redisConnectionProvider = redisConnectionProvider;
+        _logger = logger;
     }
 
-    public async Task<string> Store(TweetV2ReceivedEventArgs tweetV2ReceivedEventArgs)
+    public async Task Store(TweetV2ReceivedEventArgs tweetV2ReceivedEventArgs)
     {
         string internalId;
         try
@@ -25,10 +28,7 @@ public class TweetDbService
         }
         catch (Exception e)
         {
-            await Console.Error.WriteLineAsync($"Failed to process tweet event {tweetV2ReceivedEventArgs?.Tweet?.Id} {e.Message} {e.StackTrace}");
-            return null;
+            _logger.LogError(e, "Failed to process tweet event {Id}", tweetV2ReceivedEventArgs?.Tweet?.Id);
         }
-
-        return internalId;
     }
 }

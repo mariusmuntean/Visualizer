@@ -5,10 +5,12 @@ using Redis.OM.Modeling;
 using Serilog;
 using Serilog.Events;
 using Tweetinvi.Core.Models;
+using Tweetinvi.Models.V2;
 using Visualizer.Extensions;
 using Visualizer.GraphQl;
 using Visualizer.HostedServices;
 using Visualizer.Model;
+using Visualizer.Model.TweetDb;
 
 const string MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
@@ -71,10 +73,17 @@ app.UseSerilogRequestLogging();
 TypeAdapterConfig<DateTimeOffset, DateTime>.NewConfig()
     .MapWith(offset => offset.DateTime)
     ;
-TypeAdapterConfig<Tweet, TweetModel>.NewConfig()
+TypeAdapterConfig<TweetV2, TweetModel>.NewConfig()
     .Map(dest => dest.Id, src => src.Id)
-    // .Map(dest => dest.CreatedAt, src => src.CreatedAt.DateTime)
-    .Map(dest => dest.GeoLoc, src => new GeoLoc(src.Coordinates.Latitude, src.Coordinates.Longitude))
+    .Map(dest => dest.CreatedAt, src => src.CreatedAt.UtcTicks)
+    .Map(dest => dest.GeoLoc,
+    src => new GeoLoc(src.Geo.Coordinates.Coordinates[0], src.Geo.Coordinates.Coordinates[1]),
+    src => src.Geo.Coordinates != null && src.Geo.Coordinates.Coordinates != null)
+    ;
+TypeAdapterConfig<TweetEntitiesV2, TweetEntities>.NewConfig()
+    .Map(dest => dest.Hashtags, src => src.Hashtags.Select(h => h.Tag), src => src.Hashtags != null)
+    .Map(dest => dest.Cashtags, src => src.Cashtags.Select(c => c.Tag), src => src.Cashtags != null)
+    .Map(dest => dest.Mentions, src => src.Mentions.Select(m => m.Username), src => src.Mentions != null)
     ;
 
 // global cors policy

@@ -118,7 +118,6 @@ public class TweetDbQueryService
 
         if (expression is not null)
         {
-            expression ??= Expression.Equal(Expression.Constant(1), Expression.Constant(1));
             var tweetParameter = Expression.Parameter(typeof(TweetModel));
             var whereExpression = Expression.Lambda<Func<TweetModel, bool>>(expression, new ParameterExpression[] {tweetParameter});
             tweetCollection = tweetCollection.Where(whereExpression);

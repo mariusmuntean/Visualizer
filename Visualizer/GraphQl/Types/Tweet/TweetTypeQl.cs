@@ -10,6 +10,7 @@ public class TweetTypeQl : ObjectGraphType<TweetModel>
         Field(t => t.Id, false, typeof(StringGraphType));
         Field(t => t.ConversationId, false, typeof(StringGraphType));
         Field(t => t.AuthorId, false, typeof(StringGraphType));
+        Field(t => t.Username, false, typeof(StringGraphType));
         Field(t => t.CreatedAt, false, typeof(LongGraphType));
         Field(t => t.Lang, false, typeof(StringGraphType));
         Field(t => t.Source, false, typeof(StringGraphType));

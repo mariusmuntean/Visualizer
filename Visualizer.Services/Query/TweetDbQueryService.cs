@@ -74,11 +74,17 @@ public class TweetDbQueryService
             Expression<Func<TweetModel, bool>> filterByTweetIdExpression = tweet => tweet.Id == inputDto.TweetId;
             expression = expression is null ? filterByTweetIdExpression.Body : Expression.AndAlso(expression, filterByTweetIdExpression.Body);
         }
-
+        
         if (!string.IsNullOrWhiteSpace(inputDto.AuthorId))
         {
             Expression<Func<TweetModel, bool>> filterByAuthorIdExpression = tweet => tweet.AuthorId == inputDto.AuthorId;
             expression = expression is null ? filterByAuthorIdExpression.Body : Expression.AndAlso(expression, filterByAuthorIdExpression.Body);
+        }
+
+        if (!string.IsNullOrWhiteSpace(inputDto.Username))
+        {
+            Expression<Func<TweetModel, bool>> filterByUsernameExpression = tweet => tweet.Username == inputDto.Username;
+            expression = expression is null ? filterByUsernameExpression.Body : Expression.AndAlso(expression, filterByUsernameExpression.Body);
         }
 
         if (!string.IsNullOrWhiteSpace(inputDto.SearchTerm))
@@ -110,15 +116,30 @@ public class TweetDbQueryService
             }
         }
 
+        if (expression is not null)
+        {
+            var tweetParameter = Expression.Parameter(typeof(TweetModel));
+            var whereExpression = Expression.Lambda<Func<TweetModel, bool>>(expression, new ParameterExpression[] {tweetParameter});
+            tweetCollection = tweetCollection.Where(whereExpression);
+        }
+
+        var sortField = inputDto.SortField ?? SortField.CreatedAt;
+        var orderByDirection = inputDto.SortOrder ?? SortOrder.Descending;
+        Expression<Func<TweetModel, String>> usernameKeySelector = tweet => tweet.Username;
+        Expression<Func<TweetModel, long>> createdAtKeySelector = tweet => tweet.CreatedAt;
+        tweetCollection = (orderByDirection, sortField) switch
+        {
+            (SortOrder.Ascending, SortField.Username) => tweetCollection.OrderBy(usernameKeySelector),
+            (SortOrder.Ascending, SortField.CreatedAt) => tweetCollection.OrderBy(createdAtKeySelector),
+            (SortOrder.Descending, SortField.Username) => tweetCollection.OrderByDescending(usernameKeySelector),
+            (SortOrder.Descending, SortField.CreatedAt) => tweetCollection.OrderByDescending(createdAtKeySelector),
+            _ => tweetCollection
+        };
+
         var pageSize = inputDto.PageSize ?? 100;
         var pageNumber = inputDto.PageNumber ?? 0;
-
-        expression ??= Expression.Equal(Expression.Constant(1), Expression.Constant(1));
-        _logger.LogInformation("Generated Redis query {Query}", expression.ToString());
-
-        var p = Expression.Parameter(typeof(TweetModel));
-        var whereExpression = Expression.Lambda<Func<TweetModel, bool>>(expression, new ParameterExpression[] {p});
-        tweetCollection = tweetCollection.Where(whereExpression).Skip(pageSize * pageNumber).Take(pageSize);
+        tweetCollection = tweetCollection.Skip(pageSize * pageNumber).Take(pageSize);
+        _logger.LogInformation("Generated Redis query {Query}", tweetCollection.Expression.ToString());
 
         var tweetsIlist = await tweetCollection.ToListAsync();
         return tweetsIlist.ToList();
@@ -127,16 +148,30 @@ public class TweetDbQueryService
 
 public class FindTweetsInputDto
 {
-    public int? PageSize { get; set; }
-    public int? PageNumber { get; set; }
-
     public string TweetId { get; set; }
     public string AuthorId { get; set; }
+    public string Username { get; set; }
+    public string SearchTerm { get; set; }
+    public string[] Hashtags { set; get; }
+
+    public int? PageSize { get; set; }
+    public int? PageNumber { get; set; }
 
     public DateTime? StartingFrom { get; set; }
     public DateTime? UpTo { get; set; }
 
-    public string[] Hashtags { get; set; }
+    public SortField? SortField { get; set; }
+    public SortOrder? SortOrder { get; set; }
+}
 
-    public string SearchTerm { get; set; }
+public enum SortField
+{
+    CreatedAt,
+    Username,
+}
+
+public enum SortOrder
+{
+    Ascending,
+    Descending
 }

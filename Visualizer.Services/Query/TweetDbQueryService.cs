@@ -74,7 +74,7 @@ public class TweetDbQueryService
             Expression<Func<TweetModel, bool>> filterByTweetIdExpression = tweet => tweet.Id == inputDto.TweetId;
             expression = expression is null ? filterByTweetIdExpression.Body : Expression.AndAlso(expression, filterByTweetIdExpression.Body);
         }
-        
+
         if (!string.IsNullOrWhiteSpace(inputDto.AuthorId))
         {
             Expression<Func<TweetModel, bool>> filterByAuthorIdExpression = tweet => tweet.AuthorId == inputDto.AuthorId;
@@ -91,6 +91,12 @@ public class TweetDbQueryService
         {
             Expression<Func<TweetModel, bool>> filterBySearchTerm = tweet => tweet.Text == inputDto.SearchTerm;
             expression = expression is null ? filterBySearchTerm.Body : Expression.AndAlso(expression, filterBySearchTerm.Body);
+        }
+
+        if (!string.IsNullOrWhiteSpace(inputDto.Username))
+        {
+            Expression<Func<TweetModel, bool>> filterByUsernameExpression = tweet => tweet.Username == inputDto.Username;
+            expression = expression is null ? filterByUsernameExpression.Body : Expression.AndAlso(expression, filterByUsernameExpression.Body);
         }
 
         if (inputDto.StartingFrom is not null)
@@ -119,7 +125,7 @@ public class TweetDbQueryService
         if (expression is not null)
         {
             var tweetParameter = Expression.Parameter(typeof(TweetModel));
-            var whereExpression = Expression.Lambda<Func<TweetModel, bool>>(expression, new ParameterExpression[] {tweetParameter});
+            var whereExpression = Expression.Lambda<Func<TweetModel, bool>>(expression, new ParameterExpression[] { tweetParameter });
             tweetCollection = tweetCollection.Where(whereExpression);
         }
 

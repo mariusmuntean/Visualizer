@@ -20,17 +20,17 @@ public class TweetDbQueryService
     {
         var tweetCollection = _redisConnectionProvider.RedisCollection<TweetModel>();
 
-        if (inputDto.TweetId is not null)
+        if (!string.IsNullOrWhiteSpace(inputDto.TweetId))
         {
             tweetCollection = tweetCollection.Where(tweet => tweet.Id == inputDto.TweetId);
         }
 
-        if (inputDto.AuthorId is not null)
+        if (!string.IsNullOrWhiteSpace(inputDto.AuthorId))
         {
             tweetCollection = tweetCollection.Where(tweet => tweet.AuthorId == inputDto.AuthorId);
         }
 
-        if (inputDto.SearchTerm is not null)
+        if (!string.IsNullOrWhiteSpace(inputDto.SearchTerm))
         {
             tweetCollection = tweetCollection.Where(tweet => tweet.Text == inputDto.SearchTerm);
         }
@@ -81,6 +81,12 @@ public class TweetDbQueryService
             expression = expression is null ? filterByAuthorIdExpression.Body : Expression.AndAlso(expression, filterByAuthorIdExpression.Body);
         }
 
+        if (!string.IsNullOrWhiteSpace(inputDto.SearchTerm))
+        {
+            Expression<Func<TweetModel, bool>> filterBySearchTerm = tweet => tweet.Text == inputDto.SearchTerm;
+            expression = expression is null ? filterBySearchTerm.Body : Expression.AndAlso(expression, filterBySearchTerm.Body);
+        }
+
         if (inputDto.StartingFrom is not null)
         {
             var startingFromTicks = inputDto.StartingFrom.Value.ToUniversalTime().Ticks;
@@ -108,7 +114,7 @@ public class TweetDbQueryService
         var pageNumber = inputDto.PageNumber ?? 0;
 
         expression ??= Expression.Equal(Expression.Constant(1), Expression.Constant(1));
-        _logger.LogInformation(expression.ToString());
+        _logger.LogInformation("Generated Redis query {Query}", expression.ToString());
 
         var p = Expression.Parameter(typeof(TweetModel));
         var whereExpression = Expression.Lambda<Func<TweetModel, bool>>(expression, new ParameterExpression[] {p});

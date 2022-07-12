@@ -74,17 +74,23 @@ public class TweetDbQueryService
             Expression<Func<TweetModel, bool>> filterByTweetIdExpression = tweet => tweet.Id == inputDto.TweetId;
             expression = expression is null ? filterByTweetIdExpression.Body : Expression.AndAlso(expression, filterByTweetIdExpression.Body);
         }
-
-        if (!string.IsNullOrWhiteSpace(inputDto.SearchTerm))
+        
+        if (!string.IsNullOrWhiteSpace(inputDto.AuthorId))
         {
-            Expression<Func<TweetModel, bool>> filterBySearchTerm = tweet => tweet.Text == inputDto.SearchTerm;
-            expression = expression is null ? filterBySearchTerm.Body : Expression.AndAlso(expression, filterBySearchTerm.Body);
+            Expression<Func<TweetModel, bool>> filterByAuthorIdExpression = tweet => tweet.AuthorId == inputDto.AuthorId;
+            expression = expression is null ? filterByAuthorIdExpression.Body : Expression.AndAlso(expression, filterByAuthorIdExpression.Body);
         }
 
         if (!string.IsNullOrWhiteSpace(inputDto.Username))
         {
             Expression<Func<TweetModel, bool>> filterByUsernameExpression = tweet => tweet.Username == inputDto.Username;
             expression = expression is null ? filterByUsernameExpression.Body : Expression.AndAlso(expression, filterByUsernameExpression.Body);
+        }
+
+        if (!string.IsNullOrWhiteSpace(inputDto.SearchTerm))
+        {
+            Expression<Func<TweetModel, bool>> filterBySearchTerm = tweet => tweet.Text == inputDto.SearchTerm;
+            expression = expression is null ? filterBySearchTerm.Body : Expression.AndAlso(expression, filterBySearchTerm.Body);
         }
 
         if (inputDto.StartingFrom is not null)

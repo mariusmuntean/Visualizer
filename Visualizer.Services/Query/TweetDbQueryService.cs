@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Linq.Expressions;
 using Microsoft.Extensions.Logging;
 using Redis.OM;
@@ -63,7 +64,7 @@ public class TweetDbQueryService
         return tweetsIlist.ToList();
     }
 
-    public async Task<List<TweetModel>> FindTweetsWithExpression(FindTweetsInputDto inputDto)
+    public async Task<TweetModelsPage> FindTweetsWithExpression(FindTweetsInputDto inputDto)
     {
         var tweetCollection = _redisConnectionProvider.RedisCollection<TweetModel>();
 
@@ -74,7 +75,7 @@ public class TweetDbQueryService
             Expression<Func<TweetModel, bool>> filterByTweetIdExpression = tweet => tweet.Id == inputDto.TweetId;
             expression = expression is null ? filterByTweetIdExpression.Body : Expression.AndAlso(expression, filterByTweetIdExpression.Body);
         }
-        
+
         if (!string.IsNullOrWhiteSpace(inputDto.AuthorId))
         {
             Expression<Func<TweetModel, bool>> filterByAuthorIdExpression = tweet => tweet.AuthorId == inputDto.AuthorId;
@@ -109,7 +110,10 @@ public class TweetDbQueryService
 
         if (inputDto.Hashtags is not null && inputDto.Hashtags.Length > 0)
         {
-            foreach (var requiredHashtag in inputDto.Hashtags)
+            // ToDo: providing only the hashtags will crash the query generation. Providing the search term and the hashtags works fine.
+            Expression<Func<TweetModel, bool>> dummy = tweet => tweet.CreatedAt > int.MinValue;
+            expression = expression is null ? dummy.Body : Expression.AndAlso(expression, dummy.Body);
+            foreach (var requiredHashtag in inputDto.Hashtags.Where(h => !string.IsNullOrEmpty(h)))
             {
                 Expression<Func<TweetModel, bool>> hashtagEx = tweet => tweet.Entities.Hashtags.Contains(requiredHashtag);
                 expression = expression is null ? hashtagEx.Body : Expression.AndAlso(expression, hashtagEx.Body);
@@ -118,11 +122,15 @@ public class TweetDbQueryService
 
         if (expression is not null)
         {
-            var tweetParameter = Expression.Parameter(typeof(TweetModel));
-            var whereExpression = Expression.Lambda<Func<TweetModel, bool>>(expression, new ParameterExpression[] {tweetParameter});
+            var tweetParameter = Expression.Parameter(typeof(TweetModel), "tweet");
+            var whereExpression = Expression.Lambda<Func<TweetModel, bool>>(expression, new ParameterExpression[] { tweetParameter });
             tweetCollection = tweetCollection.Where(whereExpression);
         }
 
+        // Get the total count of the filtered tweets.
+        var count = await tweetCollection.CountAsync();
+
+        // Get the filtered, sorted and paginated tweets.
         var sortField = inputDto.SortField ?? SortField.CreatedAt;
         var orderByDirection = inputDto.SortOrder ?? SortOrder.Descending;
         Expression<Func<TweetModel, String>> usernameKeySelector = tweet => tweet.Username;
@@ -138,11 +146,12 @@ public class TweetDbQueryService
 
         var pageSize = inputDto.PageSize ?? 100;
         var pageNumber = inputDto.PageNumber ?? 0;
-        tweetCollection = tweetCollection.Skip(pageSize * pageNumber).Take(pageSize);
+        var skipAmount = pageSize * pageNumber > count ? 0 : pageSize * pageNumber;
+        tweetCollection = tweetCollection.Skip(skipAmount).Take(pageSize);
         _logger.LogInformation("Generated Redis query {Query}", tweetCollection.Expression.ToString());
 
         var tweetsIlist = await tweetCollection.ToListAsync();
-        return tweetsIlist.ToList();
+        return new TweetModelsPage(count, tweetsIlist.ToList());
     }
 }
 
@@ -175,3 +184,5 @@ public enum SortOrder
     Ascending,
     Descending
 }
+
+public record TweetModelsPage(int Total, List<TweetModel> Tweets);

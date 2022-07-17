@@ -25,10 +25,10 @@ public class TestController : ControllerBase
     }
 
     [HttpPost("startStreaming")]
-    public Task<IActionResult> StartStreaming()
+    public async Task<IActionResult> StartStreaming()
     {
-        _tweeterStreamingStarterService.StartChecking();
-        return Task.FromResult<IActionResult>(Ok());
+        await _tweeterStreamingStarterService.StartChecking();
+        return Ok();
     }
 
     [HttpPost("stopStreaming")]

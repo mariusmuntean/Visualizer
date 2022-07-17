@@ -18,7 +18,7 @@ public class TweeterStreamingStarterService : IHostedService
     public bool IsStreaming
     {
         get => _isStreaming;
-        private set { _isStreaming = value; }
+        set { _isStreaming = value; }
     }
 
     public IObservable<IsStreamingState> GetIsStreamingObservable() => _isStreamingSubject;
@@ -28,14 +28,17 @@ public class TweeterStreamingStarterService : IHostedService
         return Task.CompletedTask;
     }
 
-    public void StartChecking()
+    public async Task<bool> StartChecking()
     {
         if (!IsStreaming)
         {
-            IsStreaming = true;
-            _twitterStreamService?.ProcessSampleStream(Int32.MaxValue);
-            _isStreamingSubject.OnNext(new IsStreamingState {IsStreaming = true});
+            if (await _twitterStreamService.ProcessSampleStream(Int32.MaxValue))
+            {
+                IsStreaming = true;
+                _isStreamingSubject.OnNext(new IsStreamingState {IsStreaming = true});
+            }
         }
+        return IsStreaming;
     }
 
     public void StopChecking()
@@ -43,7 +46,7 @@ public class TweeterStreamingStarterService : IHostedService
         if (IsStreaming)
         {
             IsStreaming = false;
-            _twitterStreamService?.StopSampledStream();
+            _twitterStreamService.StopSampledStream();
             _isStreamingSubject.OnNext(new IsStreamingState {IsStreaming = false});
         }
     }

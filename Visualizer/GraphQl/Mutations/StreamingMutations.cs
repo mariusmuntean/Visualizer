@@ -7,10 +7,10 @@ public class StreamingMutations : ObjectGraphType
 {
     public StreamingMutations(TweeterStreamingStarterService tweeterStreamingStarterService)
     {
-        Field<BooleanGraphType>("startStreaming", "Start ingesting the live Twitter feed", resolve: context =>
+        FieldAsync<BooleanGraphType>("startStreaming", "Start ingesting the live Twitter feed", resolve: async context =>
         {
-            tweeterStreamingStarterService.StartChecking();
-            return true;
+            var hasStartedStreaming = await tweeterStreamingStarterService.StartChecking();
+            return hasStartedStreaming;
         });
 
         Field<BooleanGraphType>("stopStreaming", "Stop ingesting the live Twitter feed", resolve: context =>

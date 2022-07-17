@@ -6,7 +6,6 @@ namespace Visualizer.HostedServices;
 public class TweeterStreamingStarterService : IHostedService
 {
     private readonly TwitterStreamService _twitterStreamService;
-    private bool _isStreaming = false;
     private readonly ISubject<IsStreamingState> _isStreamingSubject = new ReplaySubject<IsStreamingState>(1);
 
     public TweeterStreamingStarterService(IServiceProvider serviceProvider)
@@ -15,11 +14,7 @@ public class TweeterStreamingStarterService : IHostedService
         _twitterStreamService = scope.ServiceProvider.GetService<TwitterStreamService>();
     }
 
-    public bool IsStreaming
-    {
-        get => _isStreaming;
-        set { _isStreaming = value; }
-    }
+    public bool IsStreaming { get; private set; } = false;
 
     public IObservable<IsStreamingState> GetIsStreamingObservable() => _isStreamingSubject;
 

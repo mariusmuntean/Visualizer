@@ -1,3 +1,4 @@
+using System.Net;
 using NRedisGraph;
 using Redis.OM;
 using StackExchange.Redis;
@@ -15,10 +16,7 @@ public static class WebApplicationBuilderExtensions
         var apiKeySecret = twitterSection.GetValue<string>("ApiKeySecret");
         var bearerToken = twitterSection.GetValue<string>("BearerToken");
 
-        var appCreds = new ConsumerOnlyCredentials(apiKey, apiKeySecret)
-        {
-            BearerToken = bearerToken
-        };
+        var appCreds = new ConsumerOnlyCredentials(apiKey, apiKeySecret) {BearerToken = bearerToken};
         var appClient = new TwitterClient(appCreds);
         webApplicationBuilder.Services.AddSingleton(appClient);
     }
@@ -27,18 +25,23 @@ public static class WebApplicationBuilderExtensions
     {
         var connectionString = webApplicationBuilder.Configuration.GetSection("Redis")["ConnectionString"]
                                ?? throw new Exception("Cannot read Redis connection string");
+        Console.WriteLine($"Redis connection string: {connectionString}");
         var redisConnectionProvider = new RedisConnectionProvider(connectionString);
         webApplicationBuilder.Services.AddSingleton(redisConnectionProvider);
     }
 
     public static void AddRedisGraph(this WebApplicationBuilder webApplicationBuilder)
     {
-        // var muxer = ConnectionMultiplexer.Connect("localhost");
-        var configurationOptions = ConfigurationOptions.Parse("localhost");
-        configurationOptions.SyncTimeout = 10000;
-        configurationOptions.AsyncTimeout = 10000;
-        configurationOptions.IncludePerformanceCountersInExceptions = true;
-        configurationOptions.IncludeDetailInExceptions = true;
+        var host = webApplicationBuilder.Configuration.GetSection("Redis")["Host"];
+        var port = webApplicationBuilder.Configuration.GetSection("Redis")["Port"];
+        var configurationOptions = new ConfigurationOptions
+        {
+            EndPoints = new EndPointCollection {new DnsEndPoint(host, int.Parse(port))},
+            SyncTimeout = 10000,
+            AsyncTimeout = 10000,
+            IncludePerformanceCountersInExceptions = true,
+            IncludeDetailInExceptions = true
+        };
         var muxer = ConnectionMultiplexer.Connect(configurationOptions);
         var db = muxer.GetDatabase();
         var graph = new RedisGraph(db);

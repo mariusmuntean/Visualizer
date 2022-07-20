@@ -4,6 +4,7 @@
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<RootNamespace>Visualizer</RootNamespace>
+		<DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
 	</PropertyGroup>
 	<ItemGroup>
 		<PackageReference Include="GraphQL.DataLoader" Version="5.3.0" />

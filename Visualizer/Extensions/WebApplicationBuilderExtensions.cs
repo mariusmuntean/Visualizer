@@ -23,10 +23,14 @@ public static class WebApplicationBuilderExtensions
 
     public static void AddRedisConnectionProvider(this WebApplicationBuilder webApplicationBuilder)
     {
-        var connectionString = webApplicationBuilder.Configuration.GetSection("Redis")["ConnectionString"]
-                               ?? throw new Exception("Cannot read Redis connection string");
-        Console.WriteLine($"Redis connection string: {connectionString}");
-        var redisConnectionProvider = new RedisConnectionProvider(connectionString);
+        var host = webApplicationBuilder.Configuration.GetSection("Redis")["Host"];
+        var port = webApplicationBuilder.Configuration.GetSection("Redis")["Port"];
+        var redisConnectionConfiguration = new RedisConnectionConfiguration()
+        {
+            Host = host,
+            Port = Convert.ToInt32(port)
+        };
+        var redisConnectionProvider = new RedisConnectionProvider(redisConnectionConfiguration);
         webApplicationBuilder.Services.AddSingleton(redisConnectionProvider);
     }
 

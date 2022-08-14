@@ -16,7 +16,10 @@ using Visualizer.Model.TweetDb;
 const string MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Configuration.AddJsonFile("appsettings.local.json", true, true);
+builder.Configuration
+    .AddJsonFile("appsettings.local.json", true, true)
+    .AddEnvironmentVariables()
+    ;
 
 // Configure Serilog
 Log.Logger = new LoggerConfiguration()

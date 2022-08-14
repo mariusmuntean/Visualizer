@@ -6,6 +6,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Visualizer.Model", "Visuali
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Visualizer.Services", "Visualizer.Services\Visualizer.Services.csproj", "{1C1DFCA6-3B6E-4713-98C2-67DB9854B9C4}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docker", "Docker", "{EC7133E4-4F61-449C-97C7-D37B55619C74}"
+	ProjectSection(SolutionItems) = preProject
+		Docker\.dockerignore = Docker\.dockerignore
+		Docker\Dockerfile = Docker\Dockerfile
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

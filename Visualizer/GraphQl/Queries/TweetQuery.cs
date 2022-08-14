@@ -14,7 +14,7 @@ public class TweetQuery : ObjectGraphType
 
         FieldAsync<TweetModelsPageTypeQl>("find",
         arguments: new QueryArguments(
-            new QueryArgument<FindTweetsInputTypeQl>() { Name = "filter" }
+            new QueryArgument<FindTweetsInputTypeQl> { Name = "filter" }
         ),
         resolve: async context =>
             {

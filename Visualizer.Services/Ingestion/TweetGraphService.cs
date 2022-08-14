@@ -141,7 +141,7 @@ public class TweetGraphService
         var queryUsersResult = await _redisGraph.QueryAsync("users", queryUsers);
         var records = queryUsersResult.ToList();
 
-        var graphResult = new GraphResult() { Statistics = new GraphResultStatistics(QueryInternalExecutionTime: queryUsersResult.Statistics.QueryInternalExecutionTime) };
+        var graphResult = new GraphResult { Statistics = new GraphResultStatistics(QueryInternalExecutionTime: queryUsersResult.Statistics.QueryInternalExecutionTime) };
         foreach (var record in records)
         {
             var paths = record.Values.OfType<Path>().ToArray();

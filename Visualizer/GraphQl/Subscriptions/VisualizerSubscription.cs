@@ -29,7 +29,7 @@ public class VisualizerSubscription : ObjectGraphType
         {
             Name = "rankedHashtagsChanged",
             Type = typeof(ListGraphType<HashtagTypeQl>),
-            Arguments = new QueryArguments(new QueryArgument<IntGraphType>() {Name = "amount", DefaultValue = 10}),
+            Arguments = new QueryArguments(new QueryArgument<IntGraphType> {Name = "amount", DefaultValue = 10}),
             Resolver = new FuncFieldResolver<TweetHashtagService.ScoredHashtag[]>(ResolveRankedHashtags),
             StreamResolver = new SourceStreamResolver<TweetHashtagService.ScoredHashtag[]>(SubscribeToRankedHashtags)
         });

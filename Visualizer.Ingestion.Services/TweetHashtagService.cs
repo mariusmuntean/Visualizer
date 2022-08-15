@@ -1,23 +1,19 @@
-using System.Collections.Concurrent;
+using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
 using Tweetinvi.Events.V2;
+using Visualizer.Shared.Constants;
 
 namespace Visualizer.Ingestion.Services;
 
 public class TweetHashtagService
 {
-    private const string HASHTAGS = "hashtags";
-
     private readonly IDatabase _database;
-    private readonly ISubject<ScoredHashtag> _hashtagAddedStream = new ReplaySubject<ScoredHashtag>(1);
-    private readonly ConcurrentDictionary<int, ReplaySubject<ScoredHashtag[]>> _amountToRankedHashtagsMap;
+    private readonly ILogger<TweetHashtagService> _logger;
 
-    public TweetHashtagService(IDatabase database)
+    public TweetHashtagService(IDatabase database, ILogger<TweetHashtagService> logger)
     {
         _database = database;
-        // AllHashtags = new ConcurrentStack<ScoredHashtag>();
-
-        _amountToRankedHashtagsMap = new ConcurrentDictionary<int, ReplaySubject<ScoredHashtag[]>>();
+        _logger = logger;
     }
 
     public async Task AddHashtags(TweetV2ReceivedEventArgs tweetV2ReceivedEventArgs)
@@ -38,101 +34,11 @@ public class TweetHashtagService
     {
         try
         {
-            var newScore = await _database.SortedSetIncrementAsync(new RedisKey(HASHTAGS), new RedisValue(hashtag), 1);
-
-            // Single hashtag added
-            var sortedSetEntry = new ScoredHashtag {Name = hashtag, Score = newScore};
-            // AllHashtags.Push(sortedSetEntry);
-            _hashtagAddedStream.OnNext(sortedSetEntry);
-
-
-            // Ranked hashtags subscriptions - for each subscription: get the ranked hashtags (amount from subscription) and compare to previous value. If no previous value exists or if it is distinct from the current value, then provide the observer with new data.
-            foreach (var (amount, rankedHashtagsSubject) in _amountToRankedHashtagsMap)
-            {
-                var previousKey = new RedisKey($"previous_ranked_hashtags_amount_{amount}");
-
-                // Trim the subscription
-                if (await TrimSubscriptionIfNecessary(rankedHashtagsSubject, amount, previousKey)) continue;
-
-                var currentRankedHashtags = await GetTopHashtags(amount);
-
-                var previousExists = await _database.KeyExistsAsync(previousKey);
-                if (!previousExists)
-                {
-                    // cache the current ranked hashtags for the current amount
-                    await CacheCurrentRankedHashtags(previousKey, currentRankedHashtags);
-                    rankedHashtagsSubject.OnNext(currentRankedHashtags);
-                }
-                else
-                {
-                    var previousValue = await _database.SortedSetRangeByRankWithScoresAsync(previousKey, 0, amount, Order.Descending);
-                    if (previousValue?.Length != currentRankedHashtags.Length)
-                    {
-                        // delete the previous ranked hashtags for the current amount and cache the current ranked hashtags for the current amount
-                        await ReplaceCurrentRankedHashtags(previousKey, currentRankedHashtags);
-                        rankedHashtagsSubject.OnNext(currentRankedHashtags);
-                    }
-                    else
-                    {
-                        // compare the previous ranked hashtags with the current value
-                        for (var i = 0; i < currentRankedHashtags.Length; i++)
-                        {
-                            var currentRankedHashtag = currentRankedHashtags[i];
-                            var previousRankedHashtag = previousValue[i];
-                            if (currentRankedHashtag.Name != previousRankedHashtag.Element.ToString() ||
-                                Math.Abs(currentRankedHashtag.Score - previousRankedHashtag.Score) > double.Epsilon)
-                            {
-                                // delete the previous ranked hashtags for the current amount and cache the current ranked hashtags for the current amount 
-                                await ReplaceCurrentRankedHashtags(previousKey, currentRankedHashtags);
-                                rankedHashtagsSubject.OnNext(currentRankedHashtags);
-
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
+            var _ = await _database.SortedSetIncrementAsync(new RedisKey(HashtagConstants.RankedHashtagsKey), new RedisValue(hashtag), 1);
         }
         catch (Exception ex)
         {
-            await Console.Error.WriteLineAsync($"Failed to add/increment hashtag {hashtag} in the sorted set {HASHTAGS}. {ex.Message} {ex.StackTrace}");
+            _logger.LogError(ex, "Failed to add/increment hashtag {Hashtag} in the sorted set {RankedHashtagsKey}. {ExMessage}", hashtag, HashtagConstants.RankedHashtagsKey, ex.Message);
         }
-    }
-
-    private async Task ReplaceCurrentRankedHashtags(RedisKey previousKey, ScoredHashtag[] currentRankedHashtags)
-    {
-        await _database.KeyDeleteAsync(previousKey);
-        await CacheCurrentRankedHashtags(previousKey, currentRankedHashtags);
-    }
-
-    private async Task CacheCurrentRankedHashtags(RedisKey previousKey, ScoredHashtag[] currentRankedHashtags)
-    {
-        var sortedSetEntries = currentRankedHashtags.Select(scoredHashtag => new SortedSetEntry(new RedisValue(scoredHashtag.Name), scoredHashtag.Score)).ToArray();
-        await _database.SortedSetAddAsync(previousKey, sortedSetEntries);
-    }
-
-    private async Task<bool> TrimSubscriptionIfNecessary(ReplaySubject<ScoredHashtag[]> rankedHashtagsSubject, int amount, RedisKey previousKey)
-    {
-        if (rankedHashtagsSubject.HasObservers == false)
-        {
-            if (_amountToRankedHashtagsMap.TryRemove(amount, out var _))
-            {
-                Console.WriteLine($"Removed subscription {amount}");
-                if (await _database.KeyDeleteAsync(previousKey))
-                {
-                    Console.WriteLine($"Removed the sorted set for {amount}");
-                }
-
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    public class ScoredHashtag
-    {
-        public string Name { get; set; }
-        public double Score { get; set; }
     }
 }

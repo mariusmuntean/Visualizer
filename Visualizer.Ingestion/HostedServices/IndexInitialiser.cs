@@ -15,8 +15,8 @@ public class IndexInitializer : IHostedService
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        await _redisConnectionProvider.Connection.DropIndexAsync(typeof(TweetModel));
-        await _redisConnectionProvider.Connection.CreateIndexAsync(typeof(TweetModel));
+        await _redisConnectionProvider.Connection.DropIndexAsync(typeof(TweetModel)).ConfigureAwait(false);
+        await _redisConnectionProvider.Connection.CreateIndexAsync(typeof(TweetModel)).ConfigureAwait(false);
     }
 
     public Task StopAsync(CancellationToken cancellationToken)

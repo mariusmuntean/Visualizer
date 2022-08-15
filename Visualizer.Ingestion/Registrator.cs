@@ -5,7 +5,6 @@
 using Visualizer.Ingestion.Config;
 using Visualizer.Ingestion.HostedServices;
 using Visualizer.Ingestion.Services;
-using Visualizer.Shared.Models;
 
 namespace Visualizer.Ingestion;
 
@@ -24,9 +23,9 @@ public static class Registrator
         webApplicationBuilder.Services.AddHostedService<IndexInitializer>();
 
         // Ingestion
-        webApplicationBuilder.Services.AddScoped<TwitterStreamService>();
-        webApplicationBuilder.Services.AddScoped<TweetGraphService>();
-        webApplicationBuilder.Services.AddScoped<TweetDbService>();
+        webApplicationBuilder.Services.AddSingleton<TwitterStreamService>();
+        webApplicationBuilder.Services.AddSingleton<TweetGraphService>();
+        webApplicationBuilder.Services.AddSingleton<TweetDbService>();
         webApplicationBuilder.Services.AddSingleton<TweetHashtagService>();
     }
 }

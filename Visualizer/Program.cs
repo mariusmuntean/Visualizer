@@ -1,17 +1,14 @@
 using GraphQL.Server.Ui.Altair;
 using GraphQL.Server.Ui.Voyager;
-using Mapster;
-using Redis.OM.Modeling;
 using Serilog;
 using Serilog.Events;
-using Tweetinvi.Events.V2;
-using Tweetinvi.Models.V2;
+using Visualizer.API.Clients;
 using Visualizer.Extensions;
 using Visualizer.GraphQl;
+using Visualizer.HostedServices;
 using Visualizer.Model;
-using Visualizer.Model.TweetDb;
-
-const string MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+using Visualizer.Services.Ingestion;
+using Visualizer.Shared.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Configuration
@@ -29,25 +26,11 @@ builder.Host.UseSerilog();
 
 // Add services to the container.
 
+builder.Services.AddSingleton<IIngestionService, IngestionService>();
+builder.Services.AddHostedService<IngestionService>(provider => (provider.GetService<IIngestionService>() as IngestionService)!);
+
 // Add GraphQL
 builder.AddVisualizerGraphQl();
-
-// Add TwitterClient
-// builder.AddTwitterClient();
-
-// Add RedisConnectionProvider
-// builder.AddRedisConnectionProvider();
-
-// Add RedisGraph
-// builder.AddRedisGraph();
-
-// Add Redlock
-// builder.AddRedlock();
-
-builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
 
 // Add services for the Model project
 ServiceRegistrator.Register(builder.Services);
@@ -55,12 +38,14 @@ ServiceRegistrator.Register(builder.Services);
 // Add services for the Services project
 Visualizer.Services.ServiceRegistrator.Register(builder.Services);
 
-// Add my services
-// builder.Services.AddHostedService<IndexInitializer>();
-// builder.Services.AddHostedService<GraphInitializer>();
-// builder.Services.AddSingleton<TweeterStreamingStarterService>();
-// builder.Services.AddHostedService<TweeterStreamingStarterService>(provider => provider.GetService<TweeterStreamingStarterService>());
+// Add services for the Clients project
+ClientsRegistrator.Register(builder);
 
+builder.Services.AddControllers();
+// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+builder.Services.AddHttpClient(); // Registers IHttpClientFactory - source https://docs.microsoft.com/en-us/aspnet/core/fundamentals/http-requests?view=aspnetcore-6.0#basic-usage
 builder.Services.AddCors();
 
 var app = builder.Build();
@@ -75,6 +60,7 @@ if (app.Environment.IsDevelopment())
 app.UseSerilogRequestLogging();
 
 // ToDo: call mapster
+VisualizerMapster.Configure();
 
 // global cors policy
 app.UseCors(x => x
@@ -97,14 +83,7 @@ app.UseGraphQLAltair(new AltairOptions
     // }
 });
 
-app.UseGraphQLVoyager(new VoyagerOptions
-{
-    Headers = new Dictionary<string, object>
-    {
-        ["MyHeader1"] = "MyValue",
-        ["MyHeader2"] = 42,
-    },
-});
+app.UseGraphQLVoyager(new VoyagerOptions {Headers = new Dictionary<string, object> {["MyHeader1"] = "MyValue", ["MyHeader2"] = 42,},});
 
 app.UseHttpsRedirection();
 

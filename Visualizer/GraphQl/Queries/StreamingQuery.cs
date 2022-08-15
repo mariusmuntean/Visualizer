@@ -7,12 +7,12 @@ public class StreamingQuery : ObjectGraphType
 {
     public StreamingQuery(IServiceProvider provider)
     {
-        var tweeterStreamingStarterService = provider.CreateScope().ServiceProvider.GetService<TweeterStreamingStarterService>();
+        var ingestionService = provider.CreateScope().ServiceProvider.GetService<IngestionService>();
 
         Field<BooleanGraphType>(
             "isStreaming",
             "Whether or not the live ingestion is running.",
-            resolve: context => tweeterStreamingStarterService.IsStreaming
+            resolve: context => ingestionService.IsStreaming
         );
     }
 }

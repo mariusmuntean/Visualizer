@@ -32,8 +32,16 @@ public class TwitterStreamService
         _logger = logger;
     }
 
-    public async Task<bool> ProcessSampleStream(int amount = 10)
+    public bool IsStreaming { get; private set; }
+
+    public async Task ProcessSampleStream()
     {
+        if (IsStreaming)
+        {
+            _logger.LogInformation("Streaming is already running. Nothing to start");
+            return;
+        }
+
         var tweetIngestionLock = "tweet_ingestion";
         var lockExpiryTime = TimeSpan.FromSeconds(10);
         var acquireLockDuration = TimeSpan.FromSeconds(10); // 10 seconds to acquire the lock, afterwards it gives up
@@ -44,21 +52,18 @@ public class TwitterStreamService
         if (!redLock.IsAcquired)
         {
             _logger.LogInformation("Couldn't acquire lock {TweetIngestionLock}, skipping ingestion", tweetIngestionLock);
-            return false;
+            return;
         }
 
         _logger.LogInformation("Acquired lock {TweetIngestionLock}, starting ingestion", tweetIngestionLock);
 
         // If the lock is acquired, then it means that no other service instance is processing the stream, so this instance can process it.
-        var currentAmount = 0;
-        var stopped = false;
 
         _sampleStream = _twitterClient.StreamsV2.CreateSampleStream();
         _sampleStream.TweetReceived += async (sender, args) =>
         {
             try
             {
-                currentAmount++;
                 await Task.WhenAll(
                     _tweetHashtagService.AddHashtags(args),
                     _tweetGraphService.AddNodes(args),
@@ -68,14 +73,6 @@ public class TwitterStreamService
             catch (Exception ex)
             {
                 Console.WriteLine(ex);
-            }
-            finally
-            {
-                if (currentAmount >= amount && !stopped)
-                {
-                    _sampleStream.StopStream();
-                    stopped = true;
-                }
             }
         };
 
@@ -106,13 +103,21 @@ public class TwitterStreamService
                 l.Dispose();
                 _logger.LogInformation("Released lock {TweetIngestionLock}, stopping ingestion", tweetIngestionLock);
             }, (redLock, _logger));
+
+        IsStreaming = true;
         _logger.LogInformation("Starting streaming with parameters: {Parameters}", JsonConvert.SerializeObject(parameters, Formatting.Indented));
-        return true;
     }
 
     public void StopSampledStream()
     {
+        if (!IsStreaming)
+        {
+            _logger.LogInformation("Streaming isn't running. Nothing to stop");
+            return;
+        }
+
         _sampleStream?.StopStream();
-        Console.WriteLine("Stopped streaming");
+        IsStreaming = false;
+        _logger.LogInformation("Stopped streaming");
     }
 }

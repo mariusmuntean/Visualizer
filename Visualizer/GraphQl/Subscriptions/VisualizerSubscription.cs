@@ -4,18 +4,19 @@ using GraphQL.Types;
 using Visualizer.GraphQl.Types;
 using Visualizer.HostedServices;
 using Visualizer.Services.Ingestion;
+using Visualizer.Shared.Models;
 
 namespace Visualizer.GraphQl.Subscriptions;
 
 public class VisualizerSubscription : ObjectGraphType
 {
     private readonly TweetHashtagService _tweetHashtagService;
-    private readonly TweeterStreamingStarterService _tweeterStreamingStarterService;
+    private readonly IngestionService _ingestionService;
 
     public VisualizerSubscription(IServiceProvider provider)
     {
         _tweetHashtagService = provider.CreateScope().ServiceProvider.GetRequiredService<TweetHashtagService>();
-        _tweeterStreamingStarterService = provider.CreateScope().ServiceProvider.GetRequiredService<TweeterStreamingStarterService>();
+        _ingestionService = provider.CreateScope().ServiceProvider.GetRequiredService<IngestionService>();
 
         AddField(new FieldType
         {
@@ -38,9 +39,9 @@ public class VisualizerSubscription : ObjectGraphType
         {
             Name = "isStreamingChanged",
             Description = "Produces updates whenever the state of the live ingestion has changed",
-            Type = typeof(IsStreamingStateTypeQl),
-            Resolver = new FuncFieldResolver<TweeterStreamingStarterService.IsStreamingState>(ResolveIsStreaming),
-            StreamResolver = new SourceStreamResolver<TweeterStreamingStarterService.IsStreamingState>(SubscribeIsStreaming)
+            Type = typeof(StreamingStatusTypeQl),
+            Resolver = new FuncFieldResolver<StreamingStatusDto>(ResolveIsStreaming),
+            StreamResolver = new SourceStreamResolver<StreamingStatusDto>(SubscribeIsStreaming)
         });
     }
 
@@ -59,7 +60,7 @@ public class VisualizerSubscription : ObjectGraphType
     private TweetHashtagService.ScoredHashtag[] ResolveRankedHashtags(IResolveFieldContext context)
     {
         var message = context.Source as TweetHashtagService.ScoredHashtag[];
-        return message;
+        return message!;
     }
 
     private IObservable<TweetHashtagService.ScoredHashtag[]> SubscribeToRankedHashtags(IResolveFieldContext context)
@@ -68,15 +69,11 @@ public class VisualizerSubscription : ObjectGraphType
         return _tweetHashtagService.GetRankedHashtagsObservable(amount);
     }
 
-    private TweeterStreamingStarterService.IsStreamingState ResolveIsStreaming(IResolveFieldContext context)
+    private StreamingStatusDto ResolveIsStreaming(IResolveFieldContext context)
     {
-        var message = context.Source;
-
-        return message as TweeterStreamingStarterService.IsStreamingState;
+        var message = context.Source as StreamingStatusDto;
+        return message!;
     }
 
-    private IObservable<TweeterStreamingStarterService.IsStreamingState> SubscribeIsStreaming(IResolveFieldContext context)
-    {
-        return _tweeterStreamingStarterService.GetIsStreamingObservable();
-    }
+    private IObservable<StreamingStatusDto> SubscribeIsStreaming(IResolveFieldContext context) => _ingestionService.GetStreamingStatusObservable();
 }

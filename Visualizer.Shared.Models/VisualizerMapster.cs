@@ -7,9 +7,9 @@ using Tweetinvi.Models.V2;
 
 namespace Visualizer.Shared.Models;
 
-public class Mapster
+public class VisualizerMapster
 {
-    public static void ConfigureMapster()
+    public static void Configure()
     {
         // Config Mapster
         TypeAdapterConfig<DateTimeOffset, DateTime>.NewConfig()

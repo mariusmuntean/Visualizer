@@ -17,6 +17,7 @@ public static class Registrator
         webApplicationBuilder.AddTwitterClient();
         webApplicationBuilder.AddRedisOMConnectionProvider();
         webApplicationBuilder.AddRedlock();
+        webApplicationBuilder.AddMessagePublisher();
 
         // Hosted Services
         webApplicationBuilder.Services.AddHostedService<GraphInitializer>();
@@ -27,5 +28,8 @@ public static class Registrator
         webApplicationBuilder.Services.AddSingleton<TweetGraphService>();
         webApplicationBuilder.Services.AddSingleton<TweetDbService>();
         webApplicationBuilder.Services.AddSingleton<TweetHashtagService>();
+
+        // Other
+        webApplicationBuilder.Services.AddSingleton<IStreamingStatusMessagePublisher, StreamingStatusMessagePublisher>();
     }
 }

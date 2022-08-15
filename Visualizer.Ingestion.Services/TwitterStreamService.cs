@@ -4,6 +4,7 @@ using RedLockNet;
 using Tweetinvi;
 using Tweetinvi.Parameters.V2;
 using Tweetinvi.Streaming.V2;
+using Visualizer.Shared.Models;
 
 namespace Visualizer.Ingestion.Services;
 
@@ -14,6 +15,7 @@ public class TwitterStreamService
     private readonly TweetDbService _tweetDbService;
     private readonly TweetHashtagService _tweetHashtagService;
     private readonly IDistributedLockFactory _iDistributedLockFactory;
+    private readonly IStreamingStatusMessagePublisher _streamingStatusMessagePublisher;
     private readonly ILogger<TwitterStreamService> _logger;
     private ISampleStreamV2? _sampleStream;
 
@@ -22,6 +24,7 @@ public class TwitterStreamService
         TweetDbService tweetDbService,
         TweetHashtagService tweetHashtagService,
         IDistributedLockFactory iDistributedLockFactory,
+        IStreamingStatusMessagePublisher streamingStatusMessagePublisher,
         ILogger<TwitterStreamService> logger)
     {
         _twitterClient = twitterClient;
@@ -29,6 +32,7 @@ public class TwitterStreamService
         _tweetDbService = tweetDbService;
         _tweetHashtagService = tweetHashtagService;
         _iDistributedLockFactory = iDistributedLockFactory;
+        _streamingStatusMessagePublisher = streamingStatusMessagePublisher;
         _logger = logger;
     }
 
@@ -106,9 +110,11 @@ public class TwitterStreamService
 
         IsStreaming = true;
         _logger.LogInformation("Starting streaming with parameters: {Parameters}", JsonConvert.SerializeObject(parameters, Formatting.Indented));
+
+        await PublishCurrentStreamStatusMessage().ConfigureAwait(false);
     }
 
-    public void StopSampledStream()
+    public async Task StopSampledStream()
     {
         if (!IsStreaming)
         {
@@ -119,5 +125,12 @@ public class TwitterStreamService
         _sampleStream?.StopStream();
         IsStreaming = false;
         _logger.LogInformation("Stopped streaming");
+
+        await PublishCurrentStreamStatusMessage().ConfigureAwait(false);
+    }
+
+    private async Task PublishCurrentStreamStatusMessage()
+    {
+        await _streamingStatusMessagePublisher.PublishStreamingStatus(new StreamingStatusDto {IsStreaming = IsStreaming}).ConfigureAwait(false);
     }
 }

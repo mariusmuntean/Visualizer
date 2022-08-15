@@ -25,14 +25,11 @@ public class StreamingController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> ChangeStreamingStatus([FromBody] StreamingCommand streamingCommand)
     {
-        if (streamingCommand.ShouldRun)
+        await (streamingCommand.ShouldRun switch
         {
-            await _twitterStreamService.ProcessSampleStream().ConfigureAwait(false);
-        }
-        else
-        {
-            _twitterStreamService.StopSampledStream();
-        }
+            true => _twitterStreamService.ProcessSampleStream(),
+            false => _twitterStreamService.StopSampledStream()
+        }).ConfigureAwait(false);
 
         return Ok();
     }

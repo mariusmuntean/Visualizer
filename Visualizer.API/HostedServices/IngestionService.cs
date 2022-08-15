@@ -25,12 +25,12 @@ public class IngestionService : IHostedService, IIngestionService
 
     public async Task<HttpResponseMessage> StartStreaming()
     {
-        return await _ingestionClient.StartStreaming();
+        return await _ingestionClient.StartStreaming().ConfigureAwait(false);
     }
 
     public async Task<HttpResponseMessage> StopStreaming()
     {
-        return await _ingestionClient.StopStreaming();
+        return await _ingestionClient.StopStreaming().ConfigureAwait(false);
     }
 
     public IObservable<StreamingStatusDto> GetStreamingStatusObservable()
@@ -46,7 +46,7 @@ public class IngestionService : IHostedService, IIngestionService
         // ToDo:
 
         // Get current streaming status
-        var (isStreamingResponse, streamingStatus) = await _ingestionClient.IsStreamingRunning();
+        var (isStreamingResponse, streamingStatus) = await _ingestionClient.IsStreamingRunning().ConfigureAwait(false);
         if (isStreamingResponse.IsSuccessStatusCode)
         {
             IsStreaming = streamingStatus.IsStreaming;

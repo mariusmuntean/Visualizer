@@ -43,6 +43,7 @@ public class IngestionService : IHostedService, IIngestionService
         _logger.LogInformation("{ServiceName} is starting", nameof(IngestionService));
 
         // Subscribe to streaming status changes and publish subscription updates
+        // ToDo:
 
         // Get current streaming status
         var (isStreamingResponse, streamingStatus) = await _ingestionClient.IsStreamingRunning();

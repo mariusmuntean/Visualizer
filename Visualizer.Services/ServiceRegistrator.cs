@@ -8,11 +8,11 @@ public static class ServiceRegistrator
 {
     public static void Register(IServiceCollection serviceCollection)
     {
-        // Ingestion
-        serviceCollection.AddScoped<TwitterStreamService>();
-        serviceCollection.AddScoped<TweetGraphService>();
-        serviceCollection.AddScoped<TweetDbService>();
-        serviceCollection.AddSingleton<TweetHashtagService>();
+        // // Ingestion
+        // serviceCollection.AddScoped<TwitterStreamService>();
+        // serviceCollection.AddScoped<TweetGraphService>();
+        // serviceCollection.AddScoped<TweetDbService>();
+        // serviceCollection.AddSingleton<TweetHashtagService>();
 
         // Query
         serviceCollection.AddScoped<TweetDbQueryService>();

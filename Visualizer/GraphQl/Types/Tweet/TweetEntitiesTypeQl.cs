@@ -1,5 +1,6 @@
 using GraphQL.Types;
 using Visualizer.Model.TweetDb;
+using Visualizer.Shared.Models;
 
 namespace Visualizer.GraphQl.Types.Tweet;
 

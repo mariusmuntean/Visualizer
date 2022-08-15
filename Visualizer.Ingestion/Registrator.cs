@@ -3,6 +3,9 @@
 // See the LICENSE file in the project root for more information.
 
 using Visualizer.Ingestion.Config;
+using Visualizer.Ingestion.HostedServices;
+using Visualizer.Ingestion.Services;
+using Visualizer.Shared.Models;
 
 namespace Visualizer.Ingestion;
 
@@ -10,7 +13,20 @@ public static class Registrator
 {
     public static void RegisterServices(WebApplicationBuilder webApplicationBuilder)
     {
-        // Register RedisGraph
+        webApplicationBuilder.AddVisualizerSerilog();
         webApplicationBuilder.AddRedisGraph();
+        webApplicationBuilder.AddTwitterClient();
+        webApplicationBuilder.AddRedisOMConnectionProvider();
+        webApplicationBuilder.AddRedlock();
+
+        // Hosted Services
+        webApplicationBuilder.Services.AddHostedService<GraphInitializer>();
+        webApplicationBuilder.Services.AddHostedService<IndexInitializer>();
+
+        // Ingestion
+        webApplicationBuilder.Services.AddScoped<TwitterStreamService>();
+        webApplicationBuilder.Services.AddScoped<TweetGraphService>();
+        webApplicationBuilder.Services.AddScoped<TweetDbService>();
+        webApplicationBuilder.Services.AddSingleton<TweetHashtagService>();
     }
 }

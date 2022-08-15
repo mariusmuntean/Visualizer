@@ -4,12 +4,10 @@ using Mapster;
 using Redis.OM.Modeling;
 using Serilog;
 using Serilog.Events;
-using Tweetinvi.Core.Models;
 using Tweetinvi.Events.V2;
 using Tweetinvi.Models.V2;
 using Visualizer.Extensions;
 using Visualizer.GraphQl;
-using Visualizer.HostedServices;
 using Visualizer.Model;
 using Visualizer.Model.TweetDb;
 
@@ -35,16 +33,16 @@ builder.Host.UseSerilog();
 builder.AddVisualizerGraphQl();
 
 // Add TwitterClient
-builder.AddTwitterClient();
+// builder.AddTwitterClient();
 
 // Add RedisConnectionProvider
-builder.AddRedisConnectionProvider();
+// builder.AddRedisConnectionProvider();
 
 // Add RedisGraph
 // builder.AddRedisGraph();
 
 // Add Redlock
-builder.AddRedlock();
+// builder.AddRedlock();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -58,10 +56,10 @@ ServiceRegistrator.Register(builder.Services);
 Visualizer.Services.ServiceRegistrator.Register(builder.Services);
 
 // Add my services
-builder.Services.AddHostedService<IndexInitializer>();
-builder.Services.AddHostedService<GraphInitializer>();
-builder.Services.AddSingleton<TweeterStreamingStarterService>();
-builder.Services.AddHostedService<TweeterStreamingStarterService>(provider => provider.GetService<TweeterStreamingStarterService>());
+// builder.Services.AddHostedService<IndexInitializer>();
+// builder.Services.AddHostedService<GraphInitializer>();
+// builder.Services.AddSingleton<TweeterStreamingStarterService>();
+// builder.Services.AddHostedService<TweeterStreamingStarterService>(provider => provider.GetService<TweeterStreamingStarterService>());
 
 builder.Services.AddCors();
 
@@ -76,31 +74,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseSerilogRequestLogging();
 
-// Config Mapster
-TypeAdapterConfig<DateTimeOffset, DateTime>.NewConfig()
-    .MapWith(offset => offset.DateTime)
-    ;
-TypeAdapterConfig<TweetV2ReceivedEventArgs, TweetModel>.NewConfig()
-    .Map(dest => dest.Id, src => src.Tweet.Id)
-    .Map(dest => dest.AuthorId, src => src.Tweet.AuthorId)
-    .Map(dest => dest.Text, src => src.Tweet.Text)
-    .Map(dest => dest.CreatedAt, src => src.Tweet.CreatedAt.UtcTicks)
-    .Map(dest => dest.ConversationId, src => src.Tweet.ConversationId)
-    .Map(dest => dest.Username, src => src.Includes.Users.FirstOrDefault(u => u.Id == src.Tweet.AuthorId).Username)
-    .Map(dest => dest.Entities, src => src.Tweet.Entities.Adapt<TweetEntities>())
-    .Map(dest => dest.Lang, src => src.Tweet.Lang)
-    .Map(dest => dest.Source, src => src.Tweet.Source)
-    .Map(dest => dest.OrganicMetrics, src => src.Tweet.OrganicMetrics)
-    .Map(dest => dest.ReferencedTweets, src => src.Tweet.ReferencedTweets)
-    .Map(dest => dest.GeoLoc,
-    src => new GeoLoc(src.Tweet.Geo.Coordinates.Coordinates[0], src.Tweet.Geo.Coordinates.Coordinates[1]),
-    src => src.Tweet.Geo.Coordinates != null && src.Tweet.Geo.Coordinates.Coordinates != null)
-    ;
-TypeAdapterConfig<TweetEntitiesV2, TweetEntities>.NewConfig()
-    .Map(dest => dest.Hashtags, src => src.Hashtags.Select(h => h.Tag), src => src.Hashtags != null)
-    .Map(dest => dest.Cashtags, src => src.Cashtags.Select(c => c.Tag), src => src.Cashtags != null)
-    .Map(dest => dest.Mentions, src => src.Mentions.Select(m => m.Username), src => src.Mentions != null)
-    ;
+// ToDo: call mapster
 
 // global cors policy
 app.UseCors(x => x

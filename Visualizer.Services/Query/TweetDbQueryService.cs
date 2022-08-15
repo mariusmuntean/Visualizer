@@ -3,6 +3,7 @@ using System.Linq.Expressions;
 using Microsoft.Extensions.Logging;
 using Redis.OM;
 using Visualizer.Model.TweetDb;
+using Visualizer.Shared.Models;
 
 namespace Visualizer.Services.Query;
 

@@ -1,5 +1,6 @@
 using GraphQL.Types;
 using Visualizer.Services.Ingestion;
+using Visualizer.Shared.Models;
 using static Visualizer.Services.Ingestion.TweetGraphService;
 
 namespace Visualizer.GraphQl.Types;

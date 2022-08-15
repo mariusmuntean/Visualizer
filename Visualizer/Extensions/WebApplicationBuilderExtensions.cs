@@ -9,30 +9,30 @@ namespace Visualizer.Extensions;
 
 public static class WebApplicationBuilderExtensions
 {
-    public static void AddTwitterClient(this WebApplicationBuilder webApplicationBuilder)
-    {
-        var twitterSection = webApplicationBuilder.Configuration.GetSection("Twitter");
-        var apiKey = twitterSection.GetValue<string>("ApiKey");
-        var apiKeySecret = twitterSection.GetValue<string>("ApiKeySecret");
-        var bearerToken = twitterSection.GetValue<string>("BearerToken");
+    // public static void AddTwitterClient(this WebApplicationBuilder webApplicationBuilder)
+    // {
+    //     var twitterSection = webApplicationBuilder.Configuration.GetSection("Twitter");
+    //     var apiKey = twitterSection.GetValue<string>("ApiKey");
+    //     var apiKeySecret = twitterSection.GetValue<string>("ApiKeySecret");
+    //     var bearerToken = twitterSection.GetValue<string>("BearerToken");
+    //
+    //     var appCreds = new ConsumerOnlyCredentials(apiKey, apiKeySecret) {BearerToken = bearerToken};
+    //     var appClient = new TwitterClient(appCreds);
+    //     webApplicationBuilder.Services.AddSingleton(appClient);
+    // }
 
-        var appCreds = new ConsumerOnlyCredentials(apiKey, apiKeySecret) {BearerToken = bearerToken};
-        var appClient = new TwitterClient(appCreds);
-        webApplicationBuilder.Services.AddSingleton(appClient);
-    }
-
-    public static void AddRedisConnectionProvider(this WebApplicationBuilder webApplicationBuilder)
-    {
-        var host = webApplicationBuilder.Configuration.GetSection("Redis")["Host"];
-        var port = webApplicationBuilder.Configuration.GetSection("Redis")["Port"];
-        var redisConnectionConfiguration = new RedisConnectionConfiguration()
-        {
-            Host = host,
-            Port = Convert.ToInt32(port)
-        };
-        var redisConnectionProvider = new RedisConnectionProvider(redisConnectionConfiguration);
-        webApplicationBuilder.Services.AddSingleton(redisConnectionProvider);
-    }
+    // public static void AddRedisConnectionProvider(this WebApplicationBuilder webApplicationBuilder)
+    // {
+    //     var host = webApplicationBuilder.Configuration.GetSection("Redis")["Host"];
+    //     var port = webApplicationBuilder.Configuration.GetSection("Redis")["Port"];
+    //     var redisConnectionConfiguration = new RedisConnectionConfiguration()
+    //     {
+    //         Host = host,
+    //         Port = Convert.ToInt32(port)
+    //     };
+    //     var redisConnectionProvider = new RedisConnectionProvider(redisConnectionConfiguration);
+    //     webApplicationBuilder.Services.AddSingleton(redisConnectionProvider);
+    // }
 
     // public static void AddRedisGraph(this WebApplicationBuilder webApplicationBuilder)
     // {

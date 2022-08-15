@@ -22,84 +22,84 @@ public class TweetHashtagService
         _amountToRankedHashtagsMap = new ConcurrentDictionary<int, ReplaySubject<ScoredHashtag[]>>();
     }
 
-    public async Task AddHashtags(TweetV2ReceivedEventArgs tweetV2ReceivedEventArgs)
-    {
-        if (!tweetV2ReceivedEventArgs.Tweet?.Entities?.Hashtags?.Any() ?? true)
-        {
-            return;
-        }
-
-        var hashtags = tweetV2ReceivedEventArgs.Tweet.Entities.Hashtags.Select(h => h.Tag);
-        foreach (var hashtag in hashtags)
-        {
-            await AddHashtag(hashtag);
-        }
-    }
-
-    public async Task AddHashtag(string hashtag)
-    {
-        try
-        {
-            var newScore = await _database.SortedSetIncrementAsync(new RedisKey(HASHTAGS), new RedisValue(hashtag), 1);
-
-            // Single hashtag added
-            var sortedSetEntry = new ScoredHashtag {Name = hashtag, Score = newScore};
-            // AllHashtags.Push(sortedSetEntry);
-            _hashtagAddedStream.OnNext(sortedSetEntry);
-
-
-            // Ranked hashtags subscriptions - for each subscription: get the ranked hashtags (amount from subscription) and compare to previous value. If no previous value exists or if it is distinct from the current value, then provide the observer with new data.
-            foreach (var (amount, rankedHashtagsSubject) in _amountToRankedHashtagsMap)
-            {
-                var previousKey = new RedisKey($"previous_ranked_hashtags_amount_{amount}");
-
-                // Trim the subscription
-                if (await TrimSubscriptionIfNecessary(rankedHashtagsSubject, amount, previousKey)) continue;
-
-                var currentRankedHashtags = await GetTopHashtags(amount);
-
-                var previousExists = await _database.KeyExistsAsync(previousKey);
-                if (!previousExists)
-                {
-                    // cache the current ranked hashtags for the current amount
-                    await CacheCurrentRankedHashtags(previousKey, currentRankedHashtags);
-                    rankedHashtagsSubject.OnNext(currentRankedHashtags);
-                }
-                else
-                {
-                    var previousValue = await _database.SortedSetRangeByRankWithScoresAsync(previousKey, 0, amount, Order.Descending);
-                    if (previousValue?.Length != currentRankedHashtags.Length)
-                    {
-                        // delete the previous ranked hashtags for the current amount and cache the current ranked hashtags for the current amount
-                        await ReplaceCurrentRankedHashtags(previousKey, currentRankedHashtags);
-                        rankedHashtagsSubject.OnNext(currentRankedHashtags);
-                    }
-                    else
-                    {
-                        // compare the previous ranked hashtags with the current value
-                        for (var i = 0; i < currentRankedHashtags.Length; i++)
-                        {
-                            var currentRankedHashtag = currentRankedHashtags[i];
-                            var previousRankedHashtag = previousValue[i];
-                            if (currentRankedHashtag.Name != previousRankedHashtag.Element.ToString() ||
-                                Math.Abs(currentRankedHashtag.Score - previousRankedHashtag.Score) > double.Epsilon)
-                            {
-                                // delete the previous ranked hashtags for the current amount and cache the current ranked hashtags for the current amount 
-                                await ReplaceCurrentRankedHashtags(previousKey, currentRankedHashtags);
-                                rankedHashtagsSubject.OnNext(currentRankedHashtags);
-
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            await Console.Error.WriteLineAsync($"Failed to add/increment hashtag {hashtag} in the sorted set {HASHTAGS}. {ex.Message} {ex.StackTrace}");
-        }
-    }
+    // public async Task AddHashtags(TweetV2ReceivedEventArgs tweetV2ReceivedEventArgs)
+    // {
+    //     if (!tweetV2ReceivedEventArgs.Tweet?.Entities?.Hashtags?.Any() ?? true)
+    //     {
+    //         return;
+    //     }
+    //
+    //     var hashtags = tweetV2ReceivedEventArgs.Tweet.Entities.Hashtags.Select(h => h.Tag);
+    //     foreach (var hashtag in hashtags)
+    //     {
+    //         await AddHashtag(hashtag);
+    //     }
+    // }
+    //
+    // public async Task AddHashtag(string hashtag)
+    // {
+    //     try
+    //     {
+    //         var newScore = await _database.SortedSetIncrementAsync(new RedisKey(HASHTAGS), new RedisValue(hashtag), 1);
+    //
+    //         // Single hashtag added
+    //         var sortedSetEntry = new ScoredHashtag {Name = hashtag, Score = newScore};
+    //         // AllHashtags.Push(sortedSetEntry);
+    //         _hashtagAddedStream.OnNext(sortedSetEntry);
+    //
+    //
+    //         // Ranked hashtags subscriptions - for each subscription: get the ranked hashtags (amount from subscription) and compare to previous value. If no previous value exists or if it is distinct from the current value, then provide the observer with new data.
+    //         foreach (var (amount, rankedHashtagsSubject) in _amountToRankedHashtagsMap)
+    //         {
+    //             var previousKey = new RedisKey($"previous_ranked_hashtags_amount_{amount}");
+    //
+    //             // Trim the subscription
+    //             if (await TrimSubscriptionIfNecessary(rankedHashtagsSubject, amount, previousKey)) continue;
+    //
+    //             var currentRankedHashtags = await GetTopHashtags(amount);
+    //
+    //             var previousExists = await _database.KeyExistsAsync(previousKey);
+    //             if (!previousExists)
+    //             {
+    //                 // cache the current ranked hashtags for the current amount
+    //                 await CacheCurrentRankedHashtags(previousKey, currentRankedHashtags);
+    //                 rankedHashtagsSubject.OnNext(currentRankedHashtags);
+    //             }
+    //             else
+    //             {
+    //                 var previousValue = await _database.SortedSetRangeByRankWithScoresAsync(previousKey, 0, amount, Order.Descending);
+    //                 if (previousValue?.Length != currentRankedHashtags.Length)
+    //                 {
+    //                     // delete the previous ranked hashtags for the current amount and cache the current ranked hashtags for the current amount
+    //                     await ReplaceCurrentRankedHashtags(previousKey, currentRankedHashtags);
+    //                     rankedHashtagsSubject.OnNext(currentRankedHashtags);
+    //                 }
+    //                 else
+    //                 {
+    //                     // compare the previous ranked hashtags with the current value
+    //                     for (var i = 0; i < currentRankedHashtags.Length; i++)
+    //                     {
+    //                         var currentRankedHashtag = currentRankedHashtags[i];
+    //                         var previousRankedHashtag = previousValue[i];
+    //                         if (currentRankedHashtag.Name != previousRankedHashtag.Element.ToString() ||
+    //                             Math.Abs(currentRankedHashtag.Score - previousRankedHashtag.Score) > double.Epsilon)
+    //                         {
+    //                             // delete the previous ranked hashtags for the current amount and cache the current ranked hashtags for the current amount 
+    //                             await ReplaceCurrentRankedHashtags(previousKey, currentRankedHashtags);
+    //                             rankedHashtagsSubject.OnNext(currentRankedHashtags);
+    //
+    //                             break;
+    //                         }
+    //                     }
+    //                 }
+    //             }
+    //         }
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         await Console.Error.WriteLineAsync($"Failed to add/increment hashtag {hashtag} in the sorted set {HASHTAGS}. {ex.Message} {ex.StackTrace}");
+    //     }
+    // }
 
     public IObservable<ScoredHashtag> GetHashtagAddedObservable()
     {

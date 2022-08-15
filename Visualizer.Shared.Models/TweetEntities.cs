@@ -1,7 +1,7 @@
 
 using Redis.OM.Modeling;
 
-namespace Visualizer.Model.TweetDb;
+namespace Visualizer.Shared.Models;
 
 public class TweetEntities
 {

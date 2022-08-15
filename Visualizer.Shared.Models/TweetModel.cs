@@ -1,6 +1,6 @@
 ﻿using Redis.OM.Modeling;
 
-namespace Visualizer.Model.TweetDb;
+namespace Visualizer.Shared.Models;
 
 [Document(StorageType = StorageType.Json, Prefixes = new[] { nameof(TweetModel) })]
 public class TweetModel

@@ -7,7 +7,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Visualizer.Model\Visualizer.Model.csproj" />
       <ProjectReference Include="..\Visualizer.Shared.Constants\Visualizer.Shared.Constants.csproj" />
       <ProjectReference Include="..\Visualizer.Shared.Models\Visualizer.Shared.Models.csproj" />
     </ItemGroup>

@@ -1,5 +1,4 @@
 using Redis.OM;
-using Visualizer.Model.TweetDb;
 using Visualizer.Shared.Models;
 
 namespace Visualizer.Ingestion.HostedServices;

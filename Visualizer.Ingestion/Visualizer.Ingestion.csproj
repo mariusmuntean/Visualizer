@@ -22,7 +22,6 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Visualizer.Ingestion.Services\Visualizer.Ingestion.Services.csproj" />
-      <ProjectReference Include="..\Visualizer.Model\Visualizer.Model.csproj" />
     </ItemGroup>
 
 </Project>

@@ -15,6 +15,7 @@
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\Visualizer.Model\Visualizer.Model.csproj" />
+		<ProjectReference Include="..\Visualizer.Shared.Models\Visualizer.Shared.Models.csproj" />
 	</ItemGroup>
 	<ItemGroup>
 		<Folder Include="Consumption" />

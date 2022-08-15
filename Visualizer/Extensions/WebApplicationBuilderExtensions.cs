@@ -34,23 +34,23 @@ public static class WebApplicationBuilderExtensions
         webApplicationBuilder.Services.AddSingleton(redisConnectionProvider);
     }
 
-    public static void AddRedisGraph(this WebApplicationBuilder webApplicationBuilder)
-    {
-        var host = webApplicationBuilder.Configuration.GetSection("Redis")["Host"];
-        var port = webApplicationBuilder.Configuration.GetSection("Redis")["Port"];
-        var configurationOptions = new ConfigurationOptions
-        {
-            EndPoints = new EndPointCollection {new DnsEndPoint(host, int.Parse(port))},
-            SyncTimeout = 10000,
-            AsyncTimeout = 10000,
-            IncludePerformanceCountersInExceptions = true,
-            IncludeDetailInExceptions = true
-        };
-        var muxer = ConnectionMultiplexer.Connect(configurationOptions);
-        var db = muxer.GetDatabase();
-        var graph = new RedisGraph(db);
-
-        webApplicationBuilder.Services.AddSingleton(db);
-        webApplicationBuilder.Services.AddSingleton(graph);
-    }
+    // public static void AddRedisGraph(this WebApplicationBuilder webApplicationBuilder)
+    // {
+    //     var host = webApplicationBuilder.Configuration.GetSection("Redis")["Host"];
+    //     var port = webApplicationBuilder.Configuration.GetSection("Redis")["Port"];
+    //     var configurationOptions = new ConfigurationOptions
+    //     {
+    //         EndPoints = new EndPointCollection {new DnsEndPoint(host, int.Parse(port))},
+    //         SyncTimeout = 10000,
+    //         AsyncTimeout = 10000,
+    //         IncludePerformanceCountersInExceptions = true,
+    //         IncludeDetailInExceptions = true
+    //     };
+    //     var muxer = ConnectionMultiplexer.Connect(configurationOptions);
+    //     var db = muxer.GetDatabase();
+    //     var graph = new RedisGraph(db);
+    //
+    //     webApplicationBuilder.Services.AddSingleton(db);
+    //     webApplicationBuilder.Services.AddSingleton(graph);
+    // }
 }

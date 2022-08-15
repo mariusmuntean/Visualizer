@@ -14,6 +14,7 @@
 		<PackageReference Include="GraphQL.SystemTextJson" Version="5.3.0" />
 		<PackageReference Include="Mapster" Version="7.3.0" />
 		<PackageReference Include="NRedisGraph" Version="1.7.0" />
+		<PackageReference Include="Redis.OM" Version="0.2.0" />
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.3.1" />
 		<PackageReference Include="TweetinviAPI" Version="5.0.4" />
 	</ItemGroup>

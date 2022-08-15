@@ -41,7 +41,7 @@ builder.AddTwitterClient();
 builder.AddRedisConnectionProvider();
 
 // Add RedisGraph
-builder.AddRedisGraph();
+// builder.AddRedisGraph();
 
 // Add Redlock
 builder.AddRedlock();

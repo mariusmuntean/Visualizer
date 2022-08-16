@@ -1,7 +1,11 @@
 using System.Net;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
 using StackExchange.Redis;
+using Visualizer.Ingestion.Services.Services;
+using Visualizer.Ingestion.Services.Services.Impl;
 
-namespace Visualizer.Ingestion.Config;
+namespace Visualizer.Ingestion.Services.Extensions;
 
 public static class MessagePublisherConfig
 {
@@ -20,6 +24,6 @@ public static class MessagePublisherConfig
         var muxer = ConnectionMultiplexer.Connect(configurationOptions);
 
         var iSubscriber = muxer.GetSubscriber();
-        webApplicationBuilder.Services.AddSingleton(iSubscriber);
+        webApplicationBuilder.Services.AddSingleton<IStreamingStatusMessagePublisher>(provider => new StreamingStatusMessagePublisher(iSubscriber));
     }
 }

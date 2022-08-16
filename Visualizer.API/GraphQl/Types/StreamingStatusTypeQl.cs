@@ -1,7 +1,7 @@
 using GraphQL.Types;
 using Visualizer.Shared.Models;
 
-namespace Visualizer.GraphQl.Types;
+namespace Visualizer.API.GraphQl.Types;
 
 public class StreamingStatusTypeQl : ObjectGraphType<StreamingStatusDto>
 {

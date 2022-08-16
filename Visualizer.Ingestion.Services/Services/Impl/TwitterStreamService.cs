@@ -6,23 +6,23 @@ using Tweetinvi.Parameters.V2;
 using Tweetinvi.Streaming.V2;
 using Visualizer.Shared.Models;
 
-namespace Visualizer.Ingestion.Services;
+namespace Visualizer.Ingestion.Services.Services.Impl;
 
-public class TwitterStreamService
+internal class TwitterStreamService : ITwitterStreamService
 {
     private readonly TwitterClient _twitterClient;
-    private readonly TweetGraphService _tweetGraphService;
-    private readonly TweetDbService _tweetDbService;
-    private readonly TweetHashtagService _tweetHashtagService;
+    private readonly ITweetGraphService _tweetGraphService;
+    private readonly ITweetDbService _tweetDbService;
+    private readonly ITweetHashtagService _tweetHashtagService;
     private readonly IDistributedLockFactory _iDistributedLockFactory;
     private readonly IStreamingStatusMessagePublisher _streamingStatusMessagePublisher;
     private readonly ILogger<TwitterStreamService> _logger;
     private ISampleStreamV2? _sampleStream;
 
     public TwitterStreamService(TwitterClient twitterClient,
-        TweetGraphService tweetGraphService,
-        TweetDbService tweetDbService,
-        TweetHashtagService tweetHashtagService,
+        ITweetGraphService tweetGraphService,
+        ITweetDbService tweetDbService,
+        ITweetHashtagService tweetHashtagService,
         IDistributedLockFactory iDistributedLockFactory,
         IStreamingStatusMessagePublisher streamingStatusMessagePublisher,
         ILogger<TwitterStreamService> logger)
@@ -72,7 +72,7 @@ public class TwitterStreamService
                     _tweetHashtagService.AddHashtags(args),
                     _tweetGraphService.AddNodes(args),
                     _tweetDbService.Store(args)
-                );
+                ).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -87,26 +87,25 @@ public class TwitterStreamService
         parameters.PlaceFields.Add("geo");
         parameters.TweetFields.Add("geo");
 
-        _ = _sampleStream.StartAsync(parameters)
-            .ContinueWith((task, o) =>
+        _ = _sampleStream.StartAsync(parameters).ContinueWith((task, o) =>
+        {
+            var state = o as (IRedLock l, ILogger<TwitterStreamService> log)?;
+            if (state is null)
             {
-                var state = o as (IRedLock l, ILogger<TwitterStreamService> log)?;
-                if (state is null)
-                {
-                    return;
-                }
+                return;
+            }
 
-                var (l, log) = state.Value;
-                log.LogInformation("Stopped streaming tweets");
+            var (l, log) = state.Value;
+            log.LogInformation("Stopped streaming tweets");
 
-                if (!task.IsCompletedSuccessfully)
-                {
-                    log.LogError(task.Exception, "Tweet streaming failed");
-                }
+            if (!task.IsCompletedSuccessfully)
+            {
+                log.LogError(task.Exception, "Tweet streaming failed");
+            }
 
-                l.Dispose();
-                _logger.LogInformation("Released lock {TweetIngestionLock}, stopping ingestion", tweetIngestionLock);
-            }, (redLock, _logger));
+            l.Dispose();
+            _logger.LogInformation("Released lock {TweetIngestionLock}, stopping ingestion", tweetIngestionLock);
+        }, (redLock, _logger), TaskScheduler.Current);
 
         IsStreaming = true;
         _logger.LogInformation("Starting streaming with parameters: {Parameters}", JsonConvert.SerializeObject(parameters, Formatting.Indented));

@@ -4,14 +4,14 @@ using Visualizer.API.Clients;
 using Visualizer.API.Services.Ingestion;
 using Visualizer.Shared.Models;
 
-namespace Visualizer.HostedServices;
+namespace Visualizer.API.HostedServices;
 
 public class IngestionService : IHostedService, IIngestionService
 {
     private readonly IIngestionClient _ingestionClient;
     private readonly ILogger<IngestionService> _logger;
 
-    private ISubject<StreamingStatusDto> _streamingStatusStream;
+    private readonly ISubject<StreamingStatusDto> _streamingStatusStream;
 
     public IngestionService(IIngestionClient ingestionClient, ILogger<IngestionService> logger)
     {

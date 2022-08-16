@@ -1,5 +1,6 @@
 using Serilog;
 using Visualizer.Ingestion;
+using Visualizer.Ingestion.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Configuration
@@ -9,6 +10,7 @@ builder.Configuration
 
 // Add services to the container.
 Registrator.RegisterServices(builder);
+ServicesRegistrator.Register(builder);
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

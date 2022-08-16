@@ -3,9 +3,9 @@ using StackExchange.Redis;
 using Tweetinvi.Events.V2;
 using Visualizer.Shared.Constants;
 
-namespace Visualizer.Ingestion.Services;
+namespace Visualizer.Ingestion.Services.Services.Impl;
 
-public class TweetHashtagService
+internal class TweetHashtagService : ITweetHashtagService
 {
     private readonly IDatabase _database;
     private readonly ILogger<TweetHashtagService> _logger;

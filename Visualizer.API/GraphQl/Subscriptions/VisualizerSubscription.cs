@@ -1,12 +1,12 @@
 using GraphQL;
 using GraphQL.Resolvers;
 using GraphQL.Types;
-using Visualizer.GraphQl.Types;
-using Visualizer.HostedServices;
+using Visualizer.API.GraphQl.Types;
+using Visualizer.API.HostedServices;
 using Visualizer.API.Services.Ingestion;
 using Visualizer.Shared.Models;
 
-namespace Visualizer.GraphQl.Subscriptions;
+namespace Visualizer.API.GraphQl.Subscriptions;
 
 public class VisualizerSubscription : ObjectGraphType
 {

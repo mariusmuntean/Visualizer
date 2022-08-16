@@ -1,17 +1,13 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-
 using System.Globalization;
 using StackExchange.Redis;
 using Visualizer.Shared.Constants;
 using Visualizer.Shared.Models;
 
-namespace Visualizer.Ingestion.Services;
+namespace Visualizer.Ingestion.Services.Services.Impl;
 
-public class StreamingStatusMessagePublisher : IStreamingStatusMessagePublisher
+internal class StreamingStatusMessagePublisher : IStreamingStatusMessagePublisher
 {
     private readonly ISubscriber _subscriber;
-    private readonly TwitterStreamService _twitterStreamService;
 
     public StreamingStatusMessagePublisher(ISubscriber subscriber)
     {

@@ -10,9 +10,9 @@ using GraphQL.Validation;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Serilog;
-using Visualizer.GraphQl;
+using Visualizer.API.GraphQl;
 
-namespace Visualizer.Extensions;
+namespace Visualizer.API.Extensions;
 
 public static class GraphQlExtensions
 {

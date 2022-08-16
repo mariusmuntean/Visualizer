@@ -1,6 +1,8 @@
 using GraphQL.Types;
 using Visualizer.API.Services.Query;
 
+namespace Visualizer.API.GraphQl.Types.Input;
+
 public class FindTweetsInputTypeQl : InputObjectGraphType<FindTweetsInputDto>
 {
     public FindTweetsInputTypeQl()

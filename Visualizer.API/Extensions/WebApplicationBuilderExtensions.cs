@@ -1,4 +1,4 @@
-namespace Visualizer.Extensions;
+namespace Visualizer.API.Extensions;
 
 public static class WebApplicationBuilderExtensions
 {

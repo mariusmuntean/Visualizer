@@ -1,7 +1,7 @@
 using GraphQL.Types;
 using Visualizer.API.Services.Query;
 
-namespace Visualizer.GraphQl.Types.Tweet;
+namespace Visualizer.API.GraphQl.Types.Tweet;
 
 public class TweetModelsPageTypeQl : ObjectGraphType<TweetModelsPage>
 {

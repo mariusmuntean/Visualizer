@@ -1,7 +1,7 @@
 using GraphQL.Types;
 using Visualizer.API.Services.Ingestion;
 
-namespace Visualizer.GraphQl.Mutations;
+namespace Visualizer.API.GraphQl.Mutations;
 
 public class StreamingMutations : ObjectGraphType
 {

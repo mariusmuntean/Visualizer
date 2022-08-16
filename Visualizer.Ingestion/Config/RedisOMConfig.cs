@@ -13,7 +13,7 @@ public static class RedisOMConfig
     {
         var host = webApplicationBuilder.Configuration.GetSection("Redis")["Host"];
         var port = webApplicationBuilder.Configuration.GetSection("Redis")["Port"];
-        var redisConnectionConfiguration = new RedisConnectionConfiguration()
+        var redisConnectionConfiguration = new RedisConnectionConfiguration
         {
             Host = host,
             Port = Convert.ToInt32(port)

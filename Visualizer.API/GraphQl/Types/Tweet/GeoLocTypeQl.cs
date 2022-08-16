@@ -1,7 +1,7 @@
 using GraphQL.Types;
 using Redis.OM.Modeling;
 
-namespace Visualizer.GraphQl.Types.Tweet;
+namespace Visualizer.API.GraphQl.Types.Tweet;
 
 public class GeoLocTypeQl : ObjectGraphType<GeoLoc>
 {

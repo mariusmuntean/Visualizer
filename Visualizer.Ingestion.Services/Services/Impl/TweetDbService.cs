@@ -4,9 +4,9 @@ using Redis.OM;
 using Tweetinvi.Events.V2;
 using Visualizer.Shared.Models;
 
-namespace Visualizer.Ingestion.Services;
+namespace Visualizer.Ingestion.Services.Services.Impl;
 
-public class TweetDbService
+internal class TweetDbService : ITweetDbService
 {
     private readonly RedisConnectionProvider _redisConnectionProvider;
     private readonly ILogger<TweetDbService> _logger;

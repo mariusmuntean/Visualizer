@@ -2,9 +2,9 @@ using NRedisGraph;
 using Tweetinvi.Events.V2;
 using Visualizer.Shared.Models;
 
-namespace Visualizer.Ingestion.Services;
+namespace Visualizer.Ingestion.Services.Services.Impl;
 
-public class TweetGraphService
+internal class TweetGraphService : ITweetGraphService
 {
     private readonly RedisGraph _redisGraph;
 

@@ -4,7 +4,7 @@ using RedLockNet.SERedis;
 using RedLockNet.SERedis.Configuration;
 using StackExchange.Redis;
 
-namespace Visualizer.Extensions;
+namespace Visualizer.API.Extensions;
 
 public static class RedlockExtensions
 {

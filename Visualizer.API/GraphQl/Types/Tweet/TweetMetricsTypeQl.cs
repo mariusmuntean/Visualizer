@@ -1,7 +1,7 @@
 using GraphQL.Types;
 using Visualizer.Shared.Models;
 
-namespace Visualizer.GraphQl.Types.Tweet;
+namespace Visualizer.API.GraphQl.Types.Tweet;
 
 public class TweetMetricsTypeQl : ObjectGraphType<TweetMetrics>
 {

@@ -236,7 +236,7 @@ dotnet_diagnostic.IDE0011.severity = warning
 dotnet_diagnostic.IDE0035.severity = warning
 
 # IDE0036: Order modifiers
-csharp_preferred_modifier_order = public,private,protected,internal,static,extern,new,virtual,abstract,sealed,override,readonly,unsafe,volatile,async:suggestion
+csharp_preferred_modifier_order = public, private, protected, internal, static, extern, new, virtual, abstract, sealed, override, readonly, unsafe, volatile, async:suggestion
 dotnet_diagnostic.IDE0036.severity = warning
 
 # IDE0043: Format string contains invalid placeholder
@@ -263,7 +263,7 @@ dotnet_diagnostic.IDE0062.severity = warning
 
 # IDE0073: File header
 dotnet_diagnostic.IDE0073.severity = warning
-file_header_template = Licensed to the .NET Foundation under one or more agreements.\nThe .NET Foundation licenses this file to you under the MIT license.
+file_header_template = Licensed to the.NET Foundation under one or more agreements.\nThe.NET Foundation licenses this file to you under the MIT license.
 
 # IDE0161: Convert to file-scoped namespace
 dotnet_diagnostic.IDE0161.severity = warning
@@ -272,7 +272,7 @@ dotnet_diagnostic.IDE0161.severity = warning
 dotnet_style_allow_multiple_blank_lines_experimental = false
 dotnet_diagnostic.IDE2000.severity = warning
 
-[{eng/tools/**.cs,**/{test,testassets,samples,Samples,perf,scripts}/**.cs}]
+[{eng/tools/**.cs, **/{test,testassets,samples,Samples,perf,scripts}/**.cs}]
 # CA1018: Mark attributes with AttributeUsageAttribute
 dotnet_diagnostic.CA1018.severity = suggestion
 # CA1507: Use nameof to express symbol names
@@ -339,7 +339,7 @@ dotnet_diagnostic.CA2016.severity = suggestion
 
 # Defaults for content in the shared src/ and shared runtime dir
 
-[{**/Shared/runtime/**.{cs,vb},src/Shared/test/Shared.Tests/runtime/**.{cs,vb},**/microsoft.extensions.hostfactoryresolver.sources/**.{cs,vb}}]
+[{**/Shared/runtime/**.{cs,vb},src/Shared/test/Shared.Tests/runtime/**.{cs,vb},**/microsoft.extensions.hostfactoryresolver.sources/**.{cs, vb}}]
 # CA1822: Make member static
 dotnet_diagnostic.CA1822.severity = silent
 # IDE0011: Use braces
@@ -353,6 +353,6 @@ dotnet_diagnostic.IDE0062.severity = silent
 # IDE0161: Convert to file-scoped namespace
 dotnet_diagnostic.IDE0161.severity = silent
 
-[{**/Shared/**.cs,**/microsoft.extensions.hostfactoryresolver.sources/**.{cs,vb}}]
+[{**/Shared/**.cs, **/microsoft.extensions.hostfactoryresolver.sources/**.{cs, vb}}]
 # IDE0005: Remove unused usings. Ignore for shared src files since imports for those depend on the projects in which they are included.
 dotnet_diagnostic.IDE0005.severity = silent

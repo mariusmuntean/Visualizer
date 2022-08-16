@@ -1,7 +1,7 @@
 using GraphQL.Types;
-using Visualizer.HostedServices;
+using Visualizer.API.HostedServices;
 
-namespace Visualizer.GraphQl.Queries;
+namespace Visualizer.API.GraphQl.Queries;
 
 public class StreamingQuery : ObjectGraphType
 {

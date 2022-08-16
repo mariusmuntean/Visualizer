@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 
-namespace Visualizer.Controllers;
+namespace Visualizer.API.Controllers;
 
 [ApiController]
 [Route("[controller]")]

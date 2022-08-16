@@ -3,7 +3,7 @@ using Visualizer.API.Services.Ingestion;
 using Visualizer.Shared.Models;
 using static Visualizer.API.Services.Ingestion.TweetGraphService;
 
-namespace Visualizer.GraphQl.Types;
+namespace Visualizer.API.GraphQl.Types;
 
 public class GraphResultTypeQl : ObjectGraphType<GraphResult>
 {

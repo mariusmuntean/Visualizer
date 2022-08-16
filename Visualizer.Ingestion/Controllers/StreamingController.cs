@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using Visualizer.Ingestion.Services;
+using Visualizer.Ingestion.Services.Services;
 using Visualizer.Shared.Models;
 
 namespace Visualizer.Ingestion.Controllers;
@@ -8,9 +8,9 @@ namespace Visualizer.Ingestion.Controllers;
 [Route("streaming")]
 public class StreamingController : ControllerBase
 {
-    private readonly TwitterStreamService _twitterStreamService;
+    private readonly ITwitterStreamService _twitterStreamService;
 
-    public StreamingController(TwitterStreamService twitterStreamService)
+    public StreamingController(ITwitterStreamService twitterStreamService)
     {
         _twitterStreamService = twitterStreamService;
     }
@@ -19,7 +19,7 @@ public class StreamingController : ControllerBase
     public async Task<IActionResult> GetStreamingStatus()
     {
         var isStreaming = _twitterStreamService.IsStreaming;
-        return Ok(new StreamingStatusDto() {IsStreaming = isStreaming});
+        return Ok(new StreamingStatusDto {IsStreaming = isStreaming});
     }
 
     [HttpPost]

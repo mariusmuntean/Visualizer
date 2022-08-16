@@ -1,10 +1,11 @@
 using GraphQL;
 using GraphQL.Types;
 using Newtonsoft.Json;
-using Visualizer.GraphQl.Types.Tweet;
+using Visualizer.API.GraphQl.Types.Input;
+using Visualizer.API.GraphQl.Types.Tweet;
 using Visualizer.API.Services.Query;
 
-namespace Visualizer.GraphQl.Queries;
+namespace Visualizer.API.GraphQl.Queries;
 
 public class TweetQuery : ObjectGraphType
 {

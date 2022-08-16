@@ -1,8 +1,8 @@
 using GraphQL.Types;
-using Visualizer.GraphQl.Mutations;
-using Visualizer.GraphQl.Queries;
+using Visualizer.API.GraphQl.Mutations;
+using Visualizer.API.GraphQl.Queries;
 
-namespace Visualizer.GraphQl;
+namespace Visualizer.API.GraphQl;
 
 public class VisualizerSchema : Schema
 {

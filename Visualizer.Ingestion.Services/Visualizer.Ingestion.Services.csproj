@@ -6,6 +6,10 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
     <ItemGroup>
       <ProjectReference Include="..\Visualizer.Shared.Constants\Visualizer.Shared.Constants.csproj" />
       <ProjectReference Include="..\Visualizer.Shared.Models\Visualizer.Shared.Models.csproj" />
@@ -17,6 +21,11 @@
       <PackageReference Include="Redis.OM" Version="0.2.0" />
       <PackageReference Include="RedLock.net" Version="2.3.2" />
       <PackageReference Include="TweetinviAPI" Version="5.0.4" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Reference Include="Microsoft.AspNetCore">
+      </Reference>
     </ItemGroup>
 
 </Project>

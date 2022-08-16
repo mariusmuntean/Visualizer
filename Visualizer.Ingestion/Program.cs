@@ -9,8 +9,8 @@ builder.Configuration
     ;
 
 // Add services to the container.
-Registrator.RegisterServices(builder);
-ServicesRegistrator.Register(builder);
+IngestionRegistrator.RegisterServices(builder);
+IngestionServicesRegistrator.Register(builder);
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -27,11 +27,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseSerilogRequestLogging();
-
 app.UseHttpsRedirection();
-
 app.UseAuthorization();
-
 app.MapControllers();
 
 app.Run();

@@ -6,7 +6,7 @@ using Visualizer.Ingestion.Services.Services.Impl;
 
 namespace Visualizer.Ingestion.Services;
 
-public static class ServicesRegistrator
+public static class IngestionServicesRegistrator
 {
     public static void Register(WebApplicationBuilder webApplicationBuilder)
     {

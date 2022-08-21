@@ -3,7 +3,8 @@ using GraphQL.Types;
 using Newtonsoft.Json;
 using Visualizer.API.GraphQl.Types.Input;
 using Visualizer.API.GraphQl.Types.Tweet;
-using Visualizer.API.Services.Query;
+using Visualizer.API.Services.Services;
+using Visualizer.API.Services.Services.Impl;
 
 namespace Visualizer.API.GraphQl.Queries;
 
@@ -11,7 +12,7 @@ public class TweetQuery : ObjectGraphType
 {
     public TweetQuery(IServiceProvider provider)
     {
-        var tweetDbQueryService = provider.CreateScope().ServiceProvider.GetService<TweetDbQueryService>();
+        var tweetDbQueryService = provider.CreateScope().ServiceProvider.GetService<ITweetDbQueryService>();
 
         FieldAsync<TweetModelsPageTypeQl>("find",
         arguments: new QueryArguments(

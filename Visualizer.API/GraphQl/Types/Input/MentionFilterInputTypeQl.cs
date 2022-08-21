@@ -1,9 +1,9 @@
 using GraphQL.Types;
-using Visualizer.API.Services.Ingestion;
+using Visualizer.API.Services.DTOs;
 
-namespace Visualizer.API.GraphQl.Types;
+namespace Visualizer.API.GraphQl.Types.Input;
 
-public class MentionFilterInputTypeQl : InputObjectGraphType<TweetGraphService.MentionFilterDto>
+public class MentionFilterInputTypeQl : InputObjectGraphType<MentionFilterDto>
 {
     public MentionFilterInputTypeQl()
     {

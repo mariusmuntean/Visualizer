@@ -14,10 +14,9 @@
 		<PackageReference Include="TweetinviAPI" Version="5.0.4" />
 	</ItemGroup>
 	<ItemGroup>
+		<ProjectReference Include="..\Visualizer.API.Clients\Visualizer.API.Clients.csproj" />
 		<ProjectReference Include="..\Visualizer.API.Model\Visualizer.API.Model.csproj" />
+		<ProjectReference Include="..\Visualizer.Shared.Constants\Visualizer.Shared.Constants.csproj" />
 		<ProjectReference Include="..\Visualizer.Shared.Models\Visualizer.Shared.Models.csproj" />
-	</ItemGroup>
-	<ItemGroup>
-		<Folder Include="Consumption" />
 	</ItemGroup>
 </Project>

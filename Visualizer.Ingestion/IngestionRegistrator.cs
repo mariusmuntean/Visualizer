@@ -1,7 +1,5 @@
 ﻿using Visualizer.Ingestion.Config;
 using Visualizer.Ingestion.HostedServices;
-using Visualizer.Ingestion.Services;
-using Visualizer.Ingestion.Services.Services.Impl;
 
 namespace Visualizer.Ingestion;
 

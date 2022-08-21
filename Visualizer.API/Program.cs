@@ -2,12 +2,11 @@ using GraphQL.Server.Ui.Altair;
 using GraphQL.Server.Ui.Voyager;
 using Serilog;
 using Serilog.Events;
+using Visualizer.API;
 using Visualizer.API.Clients;
-using Visualizer.API.Extensions;
 using Visualizer.API.GraphQl;
-using Visualizer.API.HostedServices;
 using Visualizer.API.Model;
-using Visualizer.API.Services.Ingestion;
+using Visualizer.API.Services;
 using Visualizer.Shared.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -24,22 +23,16 @@ Log.Logger = new LoggerConfiguration()
     .CreateLogger();
 builder.Host.UseSerilog();
 
-// Add services to the container.
-
-builder.Services.AddSingleton<IIngestionService, IngestionService>();
-builder.Services.AddHostedService<IngestionService>(provider => (provider.GetService<IIngestionService>() as IngestionService)!);
-
-// Add GraphQL
-builder.AddVisualizerGraphQl();
+VisualizerRegistrator.Register(builder);
 
 // Add services for the Model project
-ServiceRegistrator.Register(builder.Services);
+VisualizerModelRegistrator.Register(builder.Services);
 
 // Add services for the Services project
-Visualizer.API.Services.ServiceRegistrator.Register(builder.Services);
+VisualizerServicesRegistrator.Register(builder);
 
 // Add services for the Clients project
-ClientsRegistrator.Register(builder);
+VisualizerClientsRegistrator.Register(builder);
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

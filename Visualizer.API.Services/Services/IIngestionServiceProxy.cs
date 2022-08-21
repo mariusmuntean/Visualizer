@@ -1,11 +1,9 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-
+using Microsoft.Extensions.Hosting;
 using Visualizer.Shared.Models;
 
-namespace Visualizer.API.Services.Ingestion;
+namespace Visualizer.API.Services.Services;
 
-public interface IIngestionService
+public interface IIngestionServiceProxy : IHostedService
 {
     bool? IsStreaming { get; }
     Task<HttpResponseMessage> StartStreaming();

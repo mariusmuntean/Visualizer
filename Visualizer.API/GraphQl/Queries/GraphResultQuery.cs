@@ -1,7 +1,10 @@
 using GraphQL;
 using GraphQL.Types;
 using Visualizer.API.GraphQl.Types;
-using Visualizer.API.Services.Ingestion;
+using Visualizer.API.GraphQl.Types.Graph;
+using Visualizer.API.GraphQl.Types.Input;
+using Visualizer.API.Services.DTOs;
+using Visualizer.API.Services.Services;
 
 namespace Visualizer.API.GraphQl.Queries;
 
@@ -9,7 +12,7 @@ public class GraphResultQuery : ObjectGraphType
 {
     public GraphResultQuery(IServiceProvider provider)
     {
-        var tweetGraphService = provider.CreateScope().ServiceProvider.GetService<TweetGraphService>();
+        var tweetGraphService = provider.CreateScope().ServiceProvider.GetService<ITweetGraphService>();
 
         FieldAsync<GraphResultTypeQl>("graphResults",
             arguments: new QueryArguments(
@@ -27,12 +30,12 @@ public class GraphResultQuery : ObjectGraphType
                 new QueryArgument<NonNullGraphType<MentionFilterInputTypeQl>>
                 {
                     Name = "filter",
-                    DefaultValue = new TweetGraphService.MentionFilterDto { Amount = 400, AuthorUserName = null, MentionedUserNames = null, MinHops = 1, MaxHops = 10 }
+                    DefaultValue = new MentionFilterDto { Amount = 400, AuthorUserName = null, MentionedUserNames = null, MinHops = 1, MaxHops = 10 }
                 }
             ),
             resolve: async context =>
             {
-                var mentionFilterDto = context.GetArgument<TweetGraphService.MentionFilterDto>("filter");
+                var mentionFilterDto = context.GetArgument<MentionFilterDto>("filter");
                 var graphResult = await tweetGraphService.GetMentions(mentionFilterDto);
                 return graphResult;
             });

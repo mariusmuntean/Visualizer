@@ -1,5 +1,5 @@
 using GraphQL.Types;
-using Visualizer.API.Services.Query;
+using Visualizer.API.Services.Services.Impl;
 
 namespace Visualizer.API.GraphQl.Types.Tweet;
 

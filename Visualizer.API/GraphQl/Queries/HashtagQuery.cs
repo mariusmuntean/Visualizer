@@ -1,7 +1,7 @@
 using GraphQL;
 using GraphQL.Types;
 using Visualizer.API.GraphQl.Types;
-using Visualizer.API.Services.Ingestion;
+using Visualizer.API.Services.Services;
 
 namespace Visualizer.API.GraphQl.Queries;
 
@@ -9,7 +9,7 @@ public class HashtagQuery : ObjectGraphType
 {
     public HashtagQuery(IServiceProvider provider)
     {
-        var tweetHashtagService = provider.CreateScope().ServiceProvider.GetService<TweetHashtagService>();
+        var tweetHashtagService = provider.CreateScope().ServiceProvider.GetService<ITweetHashtagService>();
 
         FieldAsync<ListGraphType<HashtagTypeQl>>("TopHashtags",
             arguments: new QueryArguments(

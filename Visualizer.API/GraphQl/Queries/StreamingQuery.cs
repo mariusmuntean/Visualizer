@@ -1,5 +1,5 @@
 using GraphQL.Types;
-using Visualizer.API.HostedServices;
+using Visualizer.API.Services.Services;
 
 namespace Visualizer.API.GraphQl.Queries;
 
@@ -7,7 +7,7 @@ public class StreamingQuery : ObjectGraphType
 {
     public StreamingQuery(IServiceProvider provider)
     {
-        var ingestionService = provider.CreateScope().ServiceProvider.GetService<IngestionService>();
+        var ingestionService = provider.CreateScope().ServiceProvider.GetService<IIngestionServiceProxy>();
 
         Field<BooleanGraphType>(
             "isStreaming",

@@ -3,9 +3,9 @@ using Microsoft.Extensions.Logging;
 using Redis.OM;
 using Visualizer.Shared.Models;
 
-namespace Visualizer.API.Services.Query;
+namespace Visualizer.API.Services.Services.Impl;
 
-public class TweetDbQueryService
+internal class TweetDbQueryService : ITweetDbQueryService
 {
     private readonly RedisConnectionProvider _redisConnectionProvider;
     private readonly ILogger<TweetDbQueryService> _logger;

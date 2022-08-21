@@ -1,9 +1,9 @@
 using GraphQL.Types;
-using Visualizer.API.Services.Ingestion;
+using Visualizer.API.Services.DTOs;
 
 namespace Visualizer.API.GraphQl.Types;
 
-public class HashtagTypeQl : ObjectGraphType<TweetHashtagService.ScoredHashtag>
+public class HashtagTypeQl : ObjectGraphType<ScoredHashtag>
 {
     public HashtagTypeQl()
     {

@@ -12,7 +12,7 @@ public class TweetQuery : ObjectGraphType
 {
     public TweetQuery(IServiceProvider provider)
     {
-        var tweetDbQueryService = provider.CreateScope().ServiceProvider.GetService<ITweetDbQueryService>();
+        var tweetDbQueryService = provider.CreateScope().ServiceProvider.GetRequiredService<ITweetDbQueryService>();
 
         FieldAsync<TweetModelsPageTypeQl>("find",
         arguments: new QueryArguments(
@@ -21,7 +21,7 @@ public class TweetQuery : ObjectGraphType
         resolve: async context =>
             {
                 var filter = context.GetArgument<FindTweetsInputDto>("filter");
-                var tweetModelsPage = await tweetDbQueryService!.FindTweetsWithExpression(filter);
+                var tweetModelsPage = await tweetDbQueryService.FindTweetsWithExpression(filter).ConfigureAwait(false);
                 Console.WriteLine(JsonConvert.SerializeObject(tweetModelsPage));
                 return tweetModelsPage;
             });

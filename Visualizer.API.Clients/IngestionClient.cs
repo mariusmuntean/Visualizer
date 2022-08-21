@@ -1,4 +1,7 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using System.Net.Mime;
+using System.Text;
+using Microsoft.AspNetCore.Mvc.Formatters;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using Visualizer.Shared.Models;
 
@@ -45,7 +48,7 @@ internal class IngestionClient : IIngestionClient
     private async Task<HttpResponseMessage> SendStreamingCommand(StreamingCommand streamingCommand)
     {
         var streamingCommandStr = JsonConvert.SerializeObject(streamingCommand);
-        var stringContent = new StringContent(streamingCommandStr);
+        var stringContent = new StringContent(streamingCommandStr, Encoding.UTF8, MediaTypeNames.Application.Json);
         var response = await GetFreshClient().PostAsync("streaming", stringContent).ConfigureAwait(false);
         return response;
     }

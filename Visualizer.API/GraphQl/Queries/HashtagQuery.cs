@@ -11,7 +11,7 @@ public class HashtagQuery : ObjectGraphType
     {
         var tweetHashtagService = provider.CreateScope().ServiceProvider.GetService<ITweetHashtagService>();
 
-        FieldAsync<ListGraphType<HashtagTypeQl>>("TopHashtags",
+        FieldAsync<ListGraphType<HashtagTypeQl>>("topHashtags",
             arguments: new QueryArguments(
                 new QueryArgument<IntGraphType> { Name = "amount", DefaultValue = 10 }
             ),

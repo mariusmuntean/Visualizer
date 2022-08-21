@@ -13,9 +13,9 @@ public class StreamingMutations : ObjectGraphType
             return true;
         });
 
-        Field<BooleanGraphType>("stopStreaming", "Stop ingesting the live Twitter feed", resolve: context =>
+        FieldAsync<BooleanGraphType>("stopStreaming", "Stop ingesting the live Twitter feed", resolve: async context =>
         {
-            var _ = ingestionServiceProxy.StopStreaming();
+            var _ = await ingestionServiceProxy.StopStreaming().ConfigureAwait(false);
             return true;
         });
     }

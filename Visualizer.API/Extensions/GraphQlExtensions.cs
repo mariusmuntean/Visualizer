@@ -29,7 +29,7 @@ public static class GraphQlExtensions
             .AddSchema<VisualizerSchema>()
             .ConfigureExecutionOptions(options =>
             {
-                options.EnableMetrics = true; // faster if disabled
+                options.EnableMetrics = false; // faster if disabled
                 options.Listeners.Add(new LoggingDocExecListener());
                 var logger = options.RequestServices.GetRequiredService<ILogger<Program>>();
                 options.UnhandledExceptionDelegate = ctx =>

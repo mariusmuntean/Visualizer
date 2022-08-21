@@ -1,12 +1,16 @@
-﻿using System.Net;
-using NRedisGraph;
+// Licensed to the.NET Foundation under one or more agreements.
+// The.NET Foundation licenses this file to you under the MIT license.
+
+using System.Net;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
 using StackExchange.Redis;
 
-namespace Visualizer.Ingestion.Config;
+namespace Visualizer.API.Services.Extensions;
 
-public static class RedisGraphConfig
+public static class RedisDatabaseConfig
 {
-    public static void AddRedisGraph(this WebApplicationBuilder webApplicationBuilder)
+    public static void AddRedisDatabase(this WebApplicationBuilder webApplicationBuilder)
     {
         var host = webApplicationBuilder.Configuration.GetSection("Redis")["Host"];
         var port = webApplicationBuilder.Configuration.GetSection("Redis")["Port"];
@@ -20,9 +24,7 @@ public static class RedisGraphConfig
         };
         var muxer = ConnectionMultiplexer.Connect(configurationOptions);
         var db = muxer.GetDatabase();
-        var graph = new RedisGraph(db);
 
-        webApplicationBuilder.Services.AddSingleton(db); // ToDo: necessary?
-        webApplicationBuilder.Services.AddSingleton(graph);
+        webApplicationBuilder.Services.AddSingleton(db);
     }
 }

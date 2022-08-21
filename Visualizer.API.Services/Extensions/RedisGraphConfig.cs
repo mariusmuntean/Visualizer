@@ -1,8 +1,13 @@
-﻿using System.Net;
+// Licensed to the.NET Foundation under one or more agreements.
+// The.NET Foundation licenses this file to you under the MIT license.
+
+using System.Net;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
 using NRedisGraph;
 using StackExchange.Redis;
 
-namespace Visualizer.Ingestion.Config;
+namespace Visualizer.API.Services.Extensions;
 
 public static class RedisGraphConfig
 {
@@ -22,7 +27,6 @@ public static class RedisGraphConfig
         var db = muxer.GetDatabase();
         var graph = new RedisGraph(db);
 
-        webApplicationBuilder.Services.AddSingleton(db); // ToDo: necessary?
         webApplicationBuilder.Services.AddSingleton(graph);
     }
 }

@@ -39,9 +39,9 @@ internal class TweetHashtagService : ITweetHashtagService
     }
 
 
-    public IObservable<RankedHashtag> GetHashtagAddedObservable()
+    public IObservable<RankedHashtag> GetHashtagAddedObservable(double samplingIntervalSeconds)
     {
-        return _hashtagAddedStream.AsObservable().Sample(TimeSpan.FromSeconds(5));
+        return _hashtagAddedStream.AsObservable().Sample(TimeSpan.FromSeconds(samplingIntervalSeconds));
     }
 
     public IObservable<RankedHashtag[]> GetRankedHashtagsObservable(int amount = 10)

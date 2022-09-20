@@ -22,6 +22,7 @@ public class VisualizerSubscription : ObjectGraphType
         {
             Name = "hashtagAdded",
             Type = typeof(HashtagTypeQl),
+            Arguments = new QueryArguments(new QueryArgument[] {new QueryArgument<FloatGraphType>() {Name = "sampleIntervalSec", DefaultValue = 0, Description = "The sampling interval expressed in seconds."}}),
             Resolver = new FuncFieldResolver<RankedHashtag>(ResolveHashtag),
             StreamResolver = new SourceStreamResolver<RankedHashtag>(GetHashtagAddedResolver)
         });
@@ -53,7 +54,8 @@ public class VisualizerSubscription : ObjectGraphType
 
     private IObservable<RankedHashtag> GetHashtagAddedResolver(IResolveFieldContext context)
     {
-        return _tweetHashtagService.GetHashtagAddedObservable();
+        var samplingIntervalSeconds = context.GetArgument<double>("sampleIntervalSec");
+        return _tweetHashtagService.GetHashtagAddedObservable(samplingIntervalSeconds);
     }
 
     private RankedHashtag[] ResolveRankedHashtags(IResolveFieldContext context)

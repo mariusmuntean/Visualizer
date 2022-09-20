@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Text.Json.Serialization;
 using StackExchange.Redis;
 using Visualizer.Shared.Constants;
 using Visualizer.Shared.Models;
@@ -12,6 +13,8 @@ internal class StreamingStatusMessagePublisher : IStreamingStatusMessagePublishe
     public StreamingStatusMessagePublisher(ISubscriber subscriber)
     {
         _subscriber = subscriber;
+
+        // ToDo: use a private System.Threading.Channel to decouple receiving and publishing messages
     }
 
     public async Task PublishStreamingStatus(StreamingStatusDto streamingStatusDto)

@@ -8,11 +8,13 @@ namespace Visualizer.Ingestion.Services.Services.Impl;
 internal class TweetHashtagService : ITweetHashtagService
 {
     private readonly IDatabase _database;
+    private readonly IHashtagRankedMessagePublisher _hashtagRankedMessagePublisher;
     private readonly ILogger<TweetHashtagService> _logger;
 
-    public TweetHashtagService(IDatabase database, ILogger<TweetHashtagService> logger)
+    public TweetHashtagService(IDatabase database, IHashtagRankedMessagePublisher hashtagRankedMessagePublisher, ILogger<TweetHashtagService> logger)
     {
         _database = database;
+        _hashtagRankedMessagePublisher = hashtagRankedMessagePublisher;
         _logger = logger;
     }
 
@@ -34,11 +36,17 @@ internal class TweetHashtagService : ITweetHashtagService
     {
         try
         {
-            var _ = await _database.SortedSetIncrementAsync(new RedisKey(HashtagConstants.RankedHashtagsKey), new RedisValue(hashtag), 1);
+            // Add or increment the hashtag in the sorted set
+            var sortedSetKey = new RedisKey(HashtagConstants.RankedHashtagsSortedSetKey);
+            var sortedSetValue = new RedisValue(hashtag);
+            var newRank = await _database.SortedSetIncrementAsync(sortedSetKey, sortedSetValue, 1).ConfigureAwait(false);
+
+            // Publish a message with the ranked hashtag
+            await _hashtagRankedMessagePublisher.PublishRankedHashtagMessage(hashtag, (int) newRank).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to add/increment hashtag {Hashtag} in the sorted set {RankedHashtagsKey}. {ExMessage}", hashtag, HashtagConstants.RankedHashtagsKey, ex.Message);
+            _logger.LogError(ex, "Failed to add/increment hashtag {Hashtag} in the sorted set {RankedHashtagsKey}. {ExMessage}", hashtag, HashtagConstants.RankedHashtagsSortedSetKey, ex.Message);
         }
     }
 }

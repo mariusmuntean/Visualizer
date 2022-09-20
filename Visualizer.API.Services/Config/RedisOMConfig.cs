@@ -2,7 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Redis.OM;
 
-namespace Visualizer.API.Services.Extensions;
+namespace Visualizer.API.Services.Config;
 
 public static class RedisOMConfig
 {

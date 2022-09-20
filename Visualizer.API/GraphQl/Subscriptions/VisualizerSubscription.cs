@@ -22,8 +22,8 @@ public class VisualizerSubscription : ObjectGraphType
         {
             Name = "hashtagAdded",
             Type = typeof(HashtagTypeQl),
-            Resolver = new FuncFieldResolver<ScoredHashtag>(ResolveHashtag),
-            StreamResolver = new SourceStreamResolver<ScoredHashtag>(GetHashtagAddedResolver)
+            Resolver = new FuncFieldResolver<RankedHashtag>(ResolveHashtag),
+            StreamResolver = new SourceStreamResolver<RankedHashtag>(GetHashtagAddedResolver)
         });
 
         AddField(new FieldType
@@ -31,8 +31,8 @@ public class VisualizerSubscription : ObjectGraphType
             Name = "rankedHashtagsChanged",
             Type = typeof(ListGraphType<HashtagTypeQl>),
             Arguments = new QueryArguments(new QueryArgument<IntGraphType> {Name = "amount", DefaultValue = 10}),
-            Resolver = new FuncFieldResolver<ScoredHashtag[]>(ResolveRankedHashtags),
-            StreamResolver = new SourceStreamResolver<ScoredHashtag[]>(GetRankedHashtagsObservable)
+            Resolver = new FuncFieldResolver<RankedHashtag[]>(ResolveRankedHashtags),
+            StreamResolver = new SourceStreamResolver<RankedHashtag[]>(GetRankedHashtagsObservable)
         });
 
         AddField(new FieldType
@@ -45,24 +45,24 @@ public class VisualizerSubscription : ObjectGraphType
         });
     }
 
-    private ScoredHashtag ResolveHashtag(IResolveFieldContext context)
+    private RankedHashtag ResolveHashtag(IResolveFieldContext context)
     {
-        var message = context.Source as ScoredHashtag;
+        var message = context.Source as RankedHashtag;
         return message;
     }
 
-    private IObservable<ScoredHashtag> GetHashtagAddedResolver(IResolveFieldContext context)
+    private IObservable<RankedHashtag> GetHashtagAddedResolver(IResolveFieldContext context)
     {
         return _tweetHashtagService.GetHashtagAddedObservable();
     }
 
-    private ScoredHashtag[] ResolveRankedHashtags(IResolveFieldContext context)
+    private RankedHashtag[] ResolveRankedHashtags(IResolveFieldContext context)
     {
-        var message = context.Source as ScoredHashtag[];
+        var message = context.Source as RankedHashtag[];
         return message!;
     }
 
-    private IObservable<ScoredHashtag[]> GetRankedHashtagsObservable(IResolveFieldContext context)
+    private IObservable<RankedHashtag[]> GetRankedHashtagsObservable(IResolveFieldContext context)
     {
         var amount = context.GetArgument<int>("amount");
         return _tweetHashtagService.GetRankedHashtagsObservable(amount);

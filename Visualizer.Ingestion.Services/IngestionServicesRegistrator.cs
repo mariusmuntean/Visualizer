@@ -10,7 +10,10 @@ public static class IngestionServicesRegistrator
 {
     public static void Register(WebApplicationBuilder webApplicationBuilder)
     {
-        webApplicationBuilder.AddMessagePublisher();
+        webApplicationBuilder.AddPubSub();
+
+        webApplicationBuilder.Services.AddSingleton<IStreamingStatusMessagePublisher, StreamingStatusMessagePublisher>();
+        webApplicationBuilder.Services.AddSingleton<IHashtagRankedMessagePublisher, HashtagRankedMessagePublisher>();
 
         // Ingestion
         webApplicationBuilder.Services.AddSingleton<ITwitterStreamService, TwitterStreamService>();

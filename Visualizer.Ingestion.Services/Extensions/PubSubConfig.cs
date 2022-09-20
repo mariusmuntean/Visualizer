@@ -7,9 +7,9 @@ using Visualizer.Ingestion.Services.Services.Impl;
 
 namespace Visualizer.Ingestion.Services.Extensions;
 
-public static class MessagePublisherConfig
+public static class PubSubConfig
 {
-    public static void AddMessagePublisher(this WebApplicationBuilder webApplicationBuilder)
+    public static void AddPubSub(this WebApplicationBuilder webApplicationBuilder)
     {
         var host = webApplicationBuilder.Configuration.GetSection("Redis")["Host"];
         var port = webApplicationBuilder.Configuration.GetSection("Redis")["Port"];
@@ -24,6 +24,6 @@ public static class MessagePublisherConfig
         var muxer = ConnectionMultiplexer.Connect(configurationOptions);
 
         var iSubscriber = muxer.GetSubscriber();
-        webApplicationBuilder.Services.AddSingleton<IStreamingStatusMessagePublisher>(provider => new StreamingStatusMessagePublisher(iSubscriber));
+        webApplicationBuilder.Services.AddSingleton<ISubscriber>(iSubscriber);
     }
 }

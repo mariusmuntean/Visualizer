@@ -1,17 +1,15 @@
-// Licensed to the.NET Foundation under one or more agreements.
-// The.NET Foundation licenses this file to you under the MIT license.
-
 using System.Net;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
-using NRedisGraph;
 using StackExchange.Redis;
+using Visualizer.API.Services.Services;
+using Visualizer.API.Services.Services.Impl;
 
-namespace Visualizer.API.Services.Extensions;
+namespace Visualizer.API.Services.Config;
 
-public static class RedisGraphConfig
+public static class RedisDatabaseConfig
 {
-    public static void AddRedisGraph(this WebApplicationBuilder webApplicationBuilder)
+    public static void AddHashtagService(this WebApplicationBuilder webApplicationBuilder)
     {
         var host = webApplicationBuilder.Configuration.GetSection("Redis")["Host"];
         var port = webApplicationBuilder.Configuration.GetSection("Redis")["Port"];
@@ -25,8 +23,8 @@ public static class RedisGraphConfig
         };
         var muxer = ConnectionMultiplexer.Connect(configurationOptions);
         var db = muxer.GetDatabase();
-        var graph = new RedisGraph(db);
+        var iSubscriber = muxer.GetSubscriber();
 
-        webApplicationBuilder.Services.AddSingleton(graph);
+        webApplicationBuilder.Services.AddSingleton<ITweetHashtagService>(provider => new TweetHashtagService(db, iSubscriber));
     }
 }

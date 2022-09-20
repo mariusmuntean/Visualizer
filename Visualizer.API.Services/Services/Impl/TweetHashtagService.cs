@@ -1,59 +1,76 @@
 using System.Collections.Concurrent;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using Newtonsoft.Json;
 using StackExchange.Redis;
 using Visualizer.API.Services.DTOs;
+using Visualizer.Shared.Constants;
+using Visualizer.Shared.Models;
 
 namespace Visualizer.API.Services.Services.Impl;
 
 internal class TweetHashtagService : ITweetHashtagService
 {
-    private const string HASHTAGS = "hashtags";
-
     private readonly IDatabase _database;
-    private readonly ISubject<ScoredHashtag> _hashtagAddedStream = new ReplaySubject<ScoredHashtag>(1);
-    private readonly ConcurrentDictionary<int, ReplaySubject<ScoredHashtag[]>> _amountToRankedHashtagsMap;
+    private readonly ISubscriber _subscriber;
+    private readonly ISubject<RankedHashtag> _hashtagAddedStream = new ReplaySubject<RankedHashtag>(1);
+    private readonly ConcurrentDictionary<int, ReplaySubject<RankedHashtag[]>> _amountToRankedHashtagsMap;
 
-    public TweetHashtagService(IDatabase database)
+    private RedisChannel _rankedHashtagChannel;
+
+    public TweetHashtagService(IDatabase database, ISubscriber subscriber)
     {
         _database = database;
+        _subscriber = subscriber;
         // AllHashtags = new ConcurrentStack<ScoredHashtag>();
 
-        _amountToRankedHashtagsMap = new ConcurrentDictionary<int, ReplaySubject<ScoredHashtag[]>>();
+        _amountToRankedHashtagsMap = new ConcurrentDictionary<int, ReplaySubject<RankedHashtag[]>>();
+
+        _rankedHashtagChannel = new RedisChannel(HashtagConstants.RankedHashtagChannelName, RedisChannel.PatternMode.Literal);
+        var rankedHashtagChannelMessageQueue = _subscriber.Subscribe(_rankedHashtagChannel);
+        rankedHashtagChannelMessageQueue.OnMessage(OnRankedHashtagMessage);
     }
 
-    public IObservable<ScoredHashtag> GetHashtagAddedObservable()
+    private void OnRankedHashtagMessage(ChannelMessage message)
+    {
+        string rankedHashtagStr = message.Message;
+        var rankedHashtag = JsonConvert.DeserializeObject<RankedHashtag>(rankedHashtagStr);
+        _hashtagAddedStream.OnNext(rankedHashtag);
+    }
+
+
+    public IObservable<RankedHashtag> GetHashtagAddedObservable()
     {
         return _hashtagAddedStream.AsObservable().Sample(TimeSpan.FromSeconds(5));
     }
 
-    public IObservable<ScoredHashtag[]> GetRankedHashtagsObservable(int amount = 10)
+    public IObservable<RankedHashtag[]> GetRankedHashtagsObservable(int amount = 10)
     {
-        var rankedHashtagsObservable = _amountToRankedHashtagsMap.GetOrAdd(amount, a => new ReplaySubject<ScoredHashtag[]>(1));
+        var rankedHashtagsObservable = _amountToRankedHashtagsMap.GetOrAdd(amount, a => new ReplaySubject<RankedHashtag[]>(1));
         return rankedHashtagsObservable.AsObservable().Sample(TimeSpan.FromSeconds(5));
     }
 
 
-    private async Task ReplaceCurrentRankedHashtags(RedisKey previousKey, ScoredHashtag[] currentRankedHashtags)
+    private async Task ReplaceCurrentRankedHashtags(RedisKey previousKey, RankedHashtag[] currentRankedHashtags)
     {
-        await _database.KeyDeleteAsync(previousKey);
-        await CacheCurrentRankedHashtags(previousKey, currentRankedHashtags);
+        await _database.KeyDeleteAsync(previousKey).ConfigureAwait(false);
+        await CacheCurrentRankedHashtags(previousKey, currentRankedHashtags).ConfigureAwait(false);
     }
 
-    private async Task CacheCurrentRankedHashtags(RedisKey previousKey, ScoredHashtag[] currentRankedHashtags)
+    private async Task CacheCurrentRankedHashtags(RedisKey previousKey, RankedHashtag[] currentRankedHashtags)
     {
-        var sortedSetEntries = currentRankedHashtags.Select(scoredHashtag => new SortedSetEntry(new RedisValue(scoredHashtag.Name), scoredHashtag.Score)).ToArray();
-        await _database.SortedSetAddAsync(previousKey, sortedSetEntries);
+        var sortedSetEntries = currentRankedHashtags.Select(scoredHashtag => new SortedSetEntry(new RedisValue(scoredHashtag.Name), scoredHashtag.Rank)).ToArray();
+        await _database.SortedSetAddAsync(previousKey, sortedSetEntries).ConfigureAwait(false);
     }
 
-    private async Task<bool> TrimSubscriptionIfNecessary(ReplaySubject<ScoredHashtag[]> rankedHashtagsSubject, int amount, RedisKey previousKey)
+    private async Task<bool> TrimSubscriptionIfNecessary(ReplaySubject<RankedHashtag[]> rankedHashtagsSubject, int amount, RedisKey previousKey)
     {
         if (rankedHashtagsSubject.HasObservers == false)
         {
             if (_amountToRankedHashtagsMap.TryRemove(amount, out var _))
             {
                 Console.WriteLine($"Removed subscription {amount}");
-                if (await _database.KeyDeleteAsync(previousKey))
+                if (await _database.KeyDeleteAsync(previousKey).ConfigureAwait(false))
                 {
                     Console.WriteLine($"Removed the sorted set for {amount}");
                 }
@@ -65,9 +82,9 @@ internal class TweetHashtagService : ITweetHashtagService
         return false;
     }
 
-    public async Task<ScoredHashtag[]> GetTopHashtags(int amount = 10)
+    public async Task<RankedHashtag[]> GetTopHashtags(int amount = 10)
     {
-        var range = await _database.SortedSetRangeByRankWithScoresAsync(new RedisKey(HASHTAGS), 0, amount, Order.Descending);
-        return range.Select(entry => new ScoredHashtag {Name = entry.Element.ToString(), Score = entry.Score}).ToArray();
+        var range = await _database.SortedSetRangeByRankWithScoresAsync(new RedisKey(HashtagConstants.RankedHashtagsSortedSetKey), 0, amount, Order.Descending).ConfigureAwait(false);
+        return range.Select(entry => new RankedHashtag {Name = entry.Element.ToString(), Rank = entry.Score}).ToArray();
     }
 }

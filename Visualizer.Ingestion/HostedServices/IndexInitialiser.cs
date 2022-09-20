@@ -3,11 +3,11 @@ using Visualizer.Shared.Models;
 
 namespace Visualizer.Ingestion.HostedServices;
 
-public class IndexInitializer : IHostedService
+public class RedisOMIndexInitializer : IHostedService
 {
     private readonly RedisConnectionProvider _redisConnectionProvider;
 
-    public IndexInitializer(RedisConnectionProvider redisConnectionProvider)
+    public RedisOMIndexInitializer(RedisConnectionProvider redisConnectionProvider)
     {
         _redisConnectionProvider = redisConnectionProvider;
     }

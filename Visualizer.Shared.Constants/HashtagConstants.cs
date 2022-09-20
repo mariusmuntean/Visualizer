@@ -2,5 +2,7 @@
 
 public static class HashtagConstants
 {
-    public const string RankedHashtagsKey = "hashtags";
+    public const string RankedHashtagsSortedSetKey = "hashtags";
+
+    public const string RankedHashtagChannelName = "HashtagRanked";
 }

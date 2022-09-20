@@ -15,7 +15,7 @@ public static class IngestionRegistrator
 
         // Hosted Services
         webApplicationBuilder.Services.AddHostedService<GraphInitializer>();
-        webApplicationBuilder.Services.AddHostedService<IndexInitializer>();
+        webApplicationBuilder.Services.AddHostedService<RedisOMIndexInitializer>();
 
         // Other
 

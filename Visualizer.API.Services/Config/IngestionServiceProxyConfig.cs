@@ -7,7 +7,7 @@ using Visualizer.API.Clients;
 using Visualizer.API.Services.Services;
 using Visualizer.API.Services.Services.Impl;
 
-namespace Visualizer.API.Services.Extensions;
+namespace Visualizer.API.Services.Config;
 
 public static class IngestionServiceProxyConfig
 {

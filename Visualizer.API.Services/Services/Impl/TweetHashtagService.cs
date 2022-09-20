@@ -13,7 +13,7 @@ internal class TweetHashtagService : ITweetHashtagService
 {
     private readonly IDatabase _database;
     private readonly ISubscriber _subscriber;
-    private readonly ISubject<RankedHashtag> _hashtagAddedStream = new ReplaySubject<RankedHashtag>(1);
+    private readonly ISubject<RankedHashtag> _rankedHashtagStream = new ReplaySubject<RankedHashtag>(1);
     private readonly ConcurrentDictionary<int, ReplaySubject<RankedHashtag[]>> _amountToRankedHashtagsMap;
 
     private RedisChannel _rankedHashtagChannel;
@@ -31,17 +31,9 @@ internal class TweetHashtagService : ITweetHashtagService
         rankedHashtagChannelMessageQueue.OnMessage(OnRankedHashtagMessage);
     }
 
-    private void OnRankedHashtagMessage(ChannelMessage message)
+    public IObservable<RankedHashtag> GetRankedHashtagObservable(double samplingIntervalSeconds)
     {
-        string rankedHashtagStr = message.Message;
-        var rankedHashtag = JsonConvert.DeserializeObject<RankedHashtag>(rankedHashtagStr);
-        _hashtagAddedStream.OnNext(rankedHashtag);
-    }
-
-
-    public IObservable<RankedHashtag> GetHashtagAddedObservable(double samplingIntervalSeconds)
-    {
-        return _hashtagAddedStream.AsObservable().Sample(TimeSpan.FromSeconds(samplingIntervalSeconds));
+        return _rankedHashtagStream.AsObservable().Sample(TimeSpan.FromSeconds(samplingIntervalSeconds));
     }
 
     public IObservable<RankedHashtag[]> GetRankedHashtagsObservable(int amount = 10)
@@ -50,6 +42,12 @@ internal class TweetHashtagService : ITweetHashtagService
         return rankedHashtagsObservable.AsObservable().Sample(TimeSpan.FromSeconds(5));
     }
 
+    private void OnRankedHashtagMessage(ChannelMessage message)
+    {
+        string rankedHashtagStr = message.Message;
+        var rankedHashtag = JsonConvert.DeserializeObject<RankedHashtag>(rankedHashtagStr);
+        _rankedHashtagStream.OnNext(rankedHashtag);
+    }
 
     private async Task ReplaceCurrentRankedHashtags(RedisKey previousKey, RankedHashtag[] currentRankedHashtags)
     {

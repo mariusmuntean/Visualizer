@@ -55,7 +55,7 @@ public class VisualizerSubscription : ObjectGraphType
     private IObservable<RankedHashtag> GetHashtagAddedResolver(IResolveFieldContext context)
     {
         var samplingIntervalSeconds = context.GetArgument<double>("sampleIntervalSec");
-        return _tweetHashtagService.GetHashtagAddedObservable(samplingIntervalSeconds);
+        return _tweetHashtagService.GetRankedHashtagObservable(samplingIntervalSeconds);
     }
 
     private RankedHashtag[] ResolveRankedHashtags(IResolveFieldContext context)

@@ -5,7 +5,7 @@ namespace Visualizer.API.Services.Services;
 
 public interface ITweetHashtagService
 {
-    IObservable<RankedHashtag> GetHashtagAddedObservable(double samplingIntervalSeconds);
+    IObservable<RankedHashtag> GetRankedHashtagObservable(double samplingIntervalSeconds);
     IObservable<RankedHashtag[]> GetRankedHashtagsObservable(int amount = 10);
     Task<RankedHashtag[]> GetTopHashtags(int amount = 10);
 }

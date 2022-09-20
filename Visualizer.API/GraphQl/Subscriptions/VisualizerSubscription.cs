@@ -2,7 +2,6 @@ using GraphQL;
 using GraphQL.Resolvers;
 using GraphQL.Types;
 using Visualizer.API.GraphQl.Types;
-using Visualizer.API.Services.DTOs;
 using Visualizer.API.Services.Services;
 using Visualizer.Shared.Models;
 
@@ -20,9 +19,10 @@ public class VisualizerSubscription : ObjectGraphType
 
         AddField(new FieldType
         {
-            Name = "hashtagAdded",
+            Name = "rankedHashtag",
+            Description = "Hashtags are published with their new rank",
             Type = typeof(HashtagTypeQl),
-            Arguments = new QueryArguments(new QueryArgument[] {new QueryArgument<FloatGraphType>() {Name = "sampleIntervalSec", DefaultValue = 0, Description = "The sampling interval expressed in seconds."}}),
+            Arguments = new QueryArguments(new QueryArgument<FloatGraphType>() {Name = "sampleIntervalSec", DefaultValue = 0, Description = "The sampling interval expressed in seconds."}),
             Resolver = new FuncFieldResolver<RankedHashtag>(ResolveHashtag),
             StreamResolver = new SourceStreamResolver<RankedHashtag>(GetHashtagAddedResolver)
         });

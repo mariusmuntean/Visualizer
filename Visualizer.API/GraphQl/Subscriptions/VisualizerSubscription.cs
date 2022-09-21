@@ -29,7 +29,8 @@ public class VisualizerSubscription : ObjectGraphType
 
         AddField(new FieldType
         {
-            Name = "rankedHashtagsChanged",
+            Name = "topRankedHashtags",
+            Description = "Top X ranked hashtags are published whenever they change",
             Type = typeof(ListGraphType<HashtagTypeQl>),
             Arguments = new QueryArguments(new QueryArgument<IntGraphType> {Name = "amount", DefaultValue = 10}),
             Resolver = new FuncFieldResolver<RankedHashtag[]>(ResolveRankedHashtags),
@@ -67,7 +68,7 @@ public class VisualizerSubscription : ObjectGraphType
     private IObservable<RankedHashtag[]> GetRankedHashtagsObservable(IResolveFieldContext context)
     {
         var amount = context.GetArgument<int>("amount");
-        return _tweetHashtagService.GetRankedHashtagsObservable(amount);
+        return _tweetHashtagService.GetTopRankedHashtagsObservable(amount);
     }
 
     private StreamingStatusDto ResolveIsStreaming(IResolveFieldContext context)

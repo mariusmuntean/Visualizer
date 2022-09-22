@@ -3,6 +3,10 @@ using Visualizer.Shared.Models;
 
 namespace Visualizer.Ingestion.HostedServices;
 
+/// <summary>
+/// Creates the RedisOM Index for the models.
+/// </summary>
+// ReSharper disable once InconsistentNaming
 public class RedisOMIndexInitializer : IHostedService
 {
     private readonly RedisConnectionProvider _redisConnectionProvider;

@@ -3,6 +3,9 @@ using Visualizer.Shared.Models;
 
 namespace Visualizer.Ingestion.HostedServices;
 
+/// <summary>
+/// Initializes the graph database, e.g. by creating indices.
+/// </summary>
 public class GraphInitializer : IHostedService
 {
     private readonly RedisGraph _redisGraph;

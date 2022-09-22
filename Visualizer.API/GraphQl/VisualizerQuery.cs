@@ -9,7 +9,7 @@ public class VisualizerQuery : ObjectGraphType
     {
         Name = nameof(VisualizerQuery);
         Field<StreamingQuery>("streaming", resolve: context => new { });
-        Field<HashtagQuery>("hashtag", resolve: context => new { });
+        Field<RankedHashtagQuery>("hashtag", resolve: context => new { });
         Field<TweetQuery>("tweet", resolve: context => new { });
         Field<GraphResultQuery>("graphResult", resolve: context => new { });
     }

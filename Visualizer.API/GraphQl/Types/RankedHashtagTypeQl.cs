@@ -1,12 +1,11 @@
 using GraphQL.Types;
-using Visualizer.API.Services.DTOs;
 using Visualizer.Shared.Models;
 
 namespace Visualizer.API.GraphQl.Types;
 
-public class HashtagTypeQl : ObjectGraphType<RankedHashtag>
+public class RankedHashtagTypeQl : ObjectGraphType<RankedHashtag>
 {
-    public HashtagTypeQl()
+    public RankedHashtagTypeQl()
     {
         Field(entry => entry.Name, false, typeof(StringGraphType));
         Field(entry => entry.Rank, false, typeof(DecimalGraphType));

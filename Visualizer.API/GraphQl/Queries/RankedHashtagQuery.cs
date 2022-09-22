@@ -5,15 +5,17 @@ using Visualizer.API.Services.Services;
 
 namespace Visualizer.API.GraphQl.Queries;
 
-public class HashtagQuery : ObjectGraphType
+// ReSharper disable once ClassNeverInstantiated.Global
+public class RankedHashtagQuery : ObjectGraphType
 {
-    public HashtagQuery(IServiceProvider provider)
+    public RankedHashtagQuery(IServiceProvider provider)
     {
         var tweetHashtagService = provider.CreateScope().ServiceProvider.GetService<ITweetHashtagService>();
 
-        FieldAsync<ListGraphType<HashtagTypeQl>>("topHashtags",
+        FieldAsync<ListGraphType<RankedHashtagTypeQl>>("topRankedHashtags",
+            description: "Retrieve a specified amount of the top ranked hashtags",
             arguments: new QueryArguments(
-                new QueryArgument<IntGraphType> { Name = "amount", DefaultValue = 10 }
+                new QueryArgument<IntGraphType> {Name = "amount", DefaultValue = 10}
             ),
             resolve: async context =>
             {

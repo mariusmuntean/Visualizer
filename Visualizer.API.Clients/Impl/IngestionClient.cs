@@ -8,18 +8,18 @@ namespace Visualizer.API.Clients.Impl;
 
 internal class IngestionClient : IIngestionClient
 {
-    private readonly IHttpClientFactory _httpClientFactory;
+    private readonly HttpClient _httpClient;
     private readonly IConfiguration _configuration;
 
-    public IngestionClient(IHttpClientFactory httpClientFactory, IConfiguration configuration)
+    public IngestionClient(HttpClient httpClient, IConfiguration configuration)
     {
-        _httpClientFactory = httpClientFactory;
+        _httpClient = httpClient;
         _configuration = configuration;
     }
 
     public async Task<(HttpResponseMessage IsStreamingResponse, StreamingStatusDto streamingStatus)> IsStreamingRunning()
     {
-        var response = await GetFreshClient().GetAsync("streaming").ConfigureAwait(false);
+        var response = await _httpClient.GetAsync("streaming").ConfigureAwait(false);
         if (response.IsSuccessStatusCode)
         {
             var streamingStatusStr = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
@@ -47,15 +47,7 @@ internal class IngestionClient : IIngestionClient
     {
         var streamingCommandStr = JsonConvert.SerializeObject(streamingCommand);
         var stringContent = new StringContent(streamingCommandStr, Encoding.UTF8, MediaTypeNames.Application.Json);
-        var response = await GetFreshClient().PostAsync("streaming", stringContent).ConfigureAwait(false);
+        var response = await _httpClient.PostAsync("streaming", stringContent).ConfigureAwait(false);
         return response;
-    }
-
-    private HttpClient GetFreshClient()
-    {
-        var ingestionServiceUrl = _configuration.GetSection("Ingestion")["Url"];
-        var client = _httpClientFactory.CreateClient();
-        client.BaseAddress = new Uri(ingestionServiceUrl);
-        return client;
     }
 }

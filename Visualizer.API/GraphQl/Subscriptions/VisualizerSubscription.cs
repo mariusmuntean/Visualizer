@@ -21,7 +21,7 @@ public class VisualizerSubscription : ObjectGraphType
         {
             Name = "rankedHashtag",
             Description = "Hashtags are published with their new rank",
-            Type = typeof(HashtagTypeQl),
+            Type = typeof(RankedHashtagTypeQl),
             Arguments = new QueryArguments(new QueryArgument<FloatGraphType>() {Name = "sampleIntervalSec", DefaultValue = 0, Description = "The sampling interval expressed in seconds."}),
             Resolver = new FuncFieldResolver<RankedHashtag>(ResolveHashtag),
             StreamResolver = new SourceStreamResolver<RankedHashtag>(GetHashtagAddedResolver)
@@ -31,7 +31,7 @@ public class VisualizerSubscription : ObjectGraphType
         {
             Name = "topRankedHashtags",
             Description = "Top X ranked hashtags are published whenever they change",
-            Type = typeof(ListGraphType<HashtagTypeQl>),
+            Type = typeof(ListGraphType<RankedHashtagTypeQl>),
             Arguments = new QueryArguments(new QueryArgument<IntGraphType> {Name = "amount", DefaultValue = 10}),
             Resolver = new FuncFieldResolver<RankedHashtag[]>(ResolveRankedHashtags),
             StreamResolver = new SourceStreamResolver<RankedHashtag[]>(GetRankedHashtagsObservable)

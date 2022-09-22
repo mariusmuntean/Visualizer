@@ -1,11 +1,10 @@
 ﻿using System.Net.Mime;
 using System.Text;
-using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using Visualizer.Shared.Models;
 
-namespace Visualizer.API.Clients;
+namespace Visualizer.API.Clients.Impl;
 
 internal class IngestionClient : IIngestionClient
 {
@@ -20,7 +19,6 @@ internal class IngestionClient : IIngestionClient
 
     public async Task<(HttpResponseMessage IsStreamingResponse, StreamingStatusDto streamingStatus)> IsStreamingRunning()
     {
-
         var response = await GetFreshClient().GetAsync("streaming").ConfigureAwait(false);
         if (response.IsSuccessStatusCode)
         {

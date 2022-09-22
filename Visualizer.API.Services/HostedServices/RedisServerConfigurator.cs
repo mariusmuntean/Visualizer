@@ -17,7 +17,7 @@ public class RedisServerConfigurator : IHostedService
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        // Source https://redis.io/docs/manual/keyspace-notifications/
+        // Enable most KeySpace- and KeyEvent-Events - source https://redis.io/docs/manual/keyspace-notifications/
         await _redisServer.ConfigSetAsync("notify-keyspace-events", "KEA").ConfigureAwait(false);
     }
 

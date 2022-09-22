@@ -1,4 +1,3 @@
-
 using Redis.OM.Modeling;
 
 namespace Visualizer.API.Model.TweetDb;

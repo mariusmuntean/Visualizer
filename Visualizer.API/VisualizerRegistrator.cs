@@ -1,4 +1,4 @@
-using Visualizer.API.Extensions;
+using Visualizer.API.Config;
 
 namespace Visualizer.API;
 

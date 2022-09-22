@@ -12,7 +12,7 @@ using Newtonsoft.Json.Linq;
 using Serilog;
 using Visualizer.API.GraphQl;
 
-namespace Visualizer.API.Extensions;
+namespace Visualizer.API.Config;
 
 public static class GraphQlExtensions
 {

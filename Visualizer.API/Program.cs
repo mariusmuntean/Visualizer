@@ -1,5 +1,3 @@
-using GraphQL.Server.Ui.Altair;
-using GraphQL.Server.Ui.Voyager;
 using Serilog;
 using Serilog.Events;
 using Visualizer.API;
@@ -23,7 +21,7 @@ Log.Logger = new LoggerConfiguration()
     .CreateLogger();
 builder.Host.UseSerilog();
 
-VisualizerRegistrator.Register(builder);
+VisualizerAPIRegistrator.Register(builder);
 
 // Add services for the Model project
 VisualizerModelRegistrator.Register(builder.Services);
@@ -65,23 +63,12 @@ app.UseCors(x => x
 
 // GraphQL
 app.UseWebSockets();
-app.UseGraphQL<VisualizerSchema>();
-app.UseGraphQLWebSockets<VisualizerSchema>();
-
-app.UseGraphQLAltair(new AltairOptions
-{
-    // Headers = new Dictionary<string, string>
-    // {
-    //     ["X-api-token"] = "130fh9823bd023hd892d0j238dh",
-    // }
-});
-
-app.UseGraphQLVoyager(new VoyagerOptions {Headers = new Dictionary<string, object> {["MyHeader1"] = "MyValue", ["MyHeader2"] = 42,},});
+app.UseGraphQL<VisualizerSchema>("/graphql");
+app.UseGraphQLAltair("/ui/altair");
+app.UseGraphQLVoyager("/ui/voyager");
 
 app.UseHttpsRedirection();
-
 app.UseAuthorization();
-
 app.MapControllers();
 
 // Try to run the app

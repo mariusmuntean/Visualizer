@@ -10,11 +10,7 @@
 		<Authors>Marius Muntean</Authors>
 	</PropertyGroup>
 	<ItemGroup>
-		<PackageReference Include="GraphQL.DataLoader" Version="5.3.0" />
-		<PackageReference Include="GraphQL.MicrosoftDI" Version="5.3.0" />
-		<PackageReference Include="GraphQL.Server.All" Version="6.1.0" />
-		<PackageReference Include="GraphQL.Server.Core" Version="4.4.1" />
-		<PackageReference Include="GraphQL.SystemTextJson" Version="5.3.0" />
+		<PackageReference Include="GraphQL.Server.All" Version="7.1.1" />
 		<PackageReference Include="Mapster" Version="7.3.0" />
 		<PackageReference Include="NRedisGraph" Version="1.7.0" />
 		<PackageReference Include="Redis.OM" Version="0.2.0" />

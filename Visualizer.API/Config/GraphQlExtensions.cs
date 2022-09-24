@@ -1,11 +1,6 @@
 using GraphQL;
-using GraphQL.DataLoader;
 using GraphQL.Execution;
 using GraphQL.Instrumentation;
-using GraphQL.MicrosoftDI;
-using GraphQL.Server;
-using GraphQL.Server.Transports.AspNetCore;
-using GraphQL.SystemTextJson;
 using GraphQL.Validation;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -21,11 +16,8 @@ public static class GraphQlExtensions
         var services = webApplicationBuilder.Services;
 
         // Add GraphQL services and configure options
-        services.AddSingleton<VisualizerSchema>();
-        services.AddSingleton<GraphQLHttpMiddleware<VisualizerSchema>>();
         services.AddGraphQL(builder => builder
-            .AddApolloTracing()
-            .AddWebSocketsHttpMiddleware<VisualizerSchema>()
+            .UseApolloTracing()
             .AddSchema<VisualizerSchema>()
             .ConfigureExecutionOptions(options =>
             {
@@ -39,9 +31,9 @@ public static class GraphQlExtensions
                 };
             })
             .AddSystemTextJson()
-            .AddWebSockets()
             .AddDataLoader()
-            .AddGraphTypes(typeof(VisualizerSchema).Assembly));
+            .AddGraphTypes(typeof(VisualizerSchema).Assembly)
+        );
     }
 
     private class LoggingDocExecListener : IDocumentExecutionListener
@@ -58,9 +50,9 @@ public static class GraphQlExtensions
 
         public Task AfterExecutionAsync(IExecutionContext context)
         {
-            Log.Logger.Information("Executed {OperationType} named '{OperationName}' with variables {Variables}. Metrics {Metrics}", context.Operation.Operation,
-                context.Operation.Name, JArray.FromObject(context.Variables).ToString(Formatting.None),
-                JsonConvert.SerializeObject(context.Metrics.Finish()?.FirstOrDefault() ?? new PerfRecord("none", "none", 0)));
+            // Log.Logger.Information("Executed {OperationType} named '{OperationName}' with variables {Variables}. Metrics {Metrics}", context.Operation.Operation,
+            //     context.Operation.Name, JArray.FromObject(context.Variables).ToString(Formatting.None),
+            //     JsonConvert.SerializeObject(context.Metrics.Finish()?.FirstOrDefault() ?? new PerfRecord("none", "none", 0)));
             return Task.CompletedTask;
         }
     }

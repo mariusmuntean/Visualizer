@@ -2,7 +2,8 @@ using Visualizer.API.Config;
 
 namespace Visualizer.API;
 
-public static class VisualizerRegistrator
+// ReSharper disable once InconsistentNaming
+public static class VisualizerAPIRegistrator
 {
     public static void Register(WebApplicationBuilder webApplicationBuilder)
     {

@@ -29,7 +29,7 @@ public class VisualizerMapster
             .Map(dest => dest.ReferencedTweets, src => src.Tweet.ReferencedTweets)
             .Map(dest => dest.GeoLoc,
                 src => new GeoLoc(src.Tweet.Geo.Coordinates.Coordinates[0], src.Tweet.Geo.Coordinates.Coordinates[1]),
-                src => src.Tweet.Geo.Coordinates != null && src.Tweet.Geo.Coordinates.Coordinates != null)
+                src => src.Tweet.Geo != null && src.Tweet.Geo.Coordinates != null && src.Tweet.Geo.Coordinates.Coordinates != null && src.Tweet.Geo.Coordinates.Coordinates != null && src.Tweet.Geo.Coordinates.Coordinates.Length > 0)
             ;
         TypeAdapterConfig<TweetEntitiesV2, TweetEntities>.NewConfig()
             .Map(dest => dest.Hashtags, src => src.Hashtags.Select(h => h.Tag), src => src.Hashtags != null)

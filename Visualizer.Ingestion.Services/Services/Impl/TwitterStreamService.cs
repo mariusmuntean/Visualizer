@@ -52,7 +52,7 @@ internal class TwitterStreamService : ITwitterStreamService
         var acquireLockRetryInterval = TimeSpan.FromSeconds(5); // 5 seconds to wait before retrying to acquire the lock
         var redLock = await _iDistributedLockFactory.CreateLockAsync(tweetIngestionLock, lockExpiryTime, acquireLockDuration, acquireLockRetryInterval);
 
-        // If the lock is not acquired, then it means that another service instance is already processing the stream.
+        // If the lock could not be acquired, then it means that another service instance is already processing the stream.
         if (!redLock.IsAcquired)
         {
             _logger.LogInformation("Couldn't acquire lock {TweetIngestionLock}, skipping ingestion", tweetIngestionLock);
@@ -61,8 +61,7 @@ internal class TwitterStreamService : ITwitterStreamService
 
         _logger.LogInformation("Acquired lock {TweetIngestionLock}, starting ingestion", tweetIngestionLock);
 
-        // If the lock is acquired, then it means that no other service instance is processing the stream, so this instance can process it.
-
+        // If the lock could be acquired, then it means that no other service instance is processing the stream, so this instance can process it.
         _sampleStream = _twitterClient.StreamsV2.CreateSampleStream();
         _sampleStream.TweetReceived += async (sender, args) =>
         {

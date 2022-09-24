@@ -1,6 +1,7 @@
 using Serilog;
 using Visualizer.Ingestion;
 using Visualizer.Ingestion.Services;
+using Visualizer.Shared.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Configuration
@@ -18,6 +19,8 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
+
+VisualizerMapster.Configure();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

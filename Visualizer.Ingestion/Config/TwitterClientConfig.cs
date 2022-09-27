@@ -13,7 +13,7 @@ public static class TwitterClientConfig
         var bearerToken = twitterSection.GetValue<string>("BearerToken");
 
         var appCreds = new ConsumerOnlyCredentials(apiKey, apiKeySecret) {BearerToken = bearerToken};
-        var appClient = new TwitterClient(appCreds);
-        webApplicationBuilder.Services.AddSingleton(appClient);
+        var twitterClient = new TwitterClient(appCreds);
+        webApplicationBuilder.Services.AddSingleton(twitterClient);
     }
 }

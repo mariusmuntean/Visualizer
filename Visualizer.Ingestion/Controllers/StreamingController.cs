@@ -15,14 +15,16 @@ public class StreamingController : ControllerBase
         _twitterStreamService = twitterStreamService;
     }
 
+    [Produces("application/json")]
     [HttpGet]
-    public async Task<IActionResult> GetStreamingStatus()
+    public IActionResult GetStreamingStatus()
     {
         var isStreaming = _twitterStreamService.IsStreaming;
         return Ok(new StreamingStatusDto {IsStreaming = isStreaming});
     }
 
     [HttpPost]
+    [Consumes("application/json")]
     public async Task<IActionResult> ChangeStreamingStatus([FromBody] StreamingCommand streamingCommand)
     {
         await (streamingCommand.ShouldRun switch

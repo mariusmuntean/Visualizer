@@ -2,6 +2,7 @@ using System.Net;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Polly;
 using Polly.Extensions.Http;
 using Visualizer.API.Clients.Impl;
@@ -15,7 +16,9 @@ public static class VisualizerClientsRegistrator
         webApplicationBuilder.Services.AddHttpClient<IIngestionClient, IngestionClient>((provider, client) =>
             {
                 var config = provider.GetRequiredService<IConfiguration>();
-                var ingestionServiceUrl = config.GetSection("Ingestion")["Url"];
+                var ingestionServiceUrl = config.GetSection("Ingestion")["Url"].TrimStart("https://".ToCharArray());
+                ingestionServiceUrl = $"https://{ingestionServiceUrl}";
+                provider.GetService<ILogger<IngestionClient>>()?.LogInformation("Ingestion service URL: {IngestionServiceUrl}", ingestionServiceUrl);
                 client.BaseAddress = new Uri(ingestionServiceUrl);
             })
             .SetHandlerLifetime(TimeSpan.FromMinutes(5))

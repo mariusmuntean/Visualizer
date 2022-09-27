@@ -1,6 +1,5 @@
 ﻿using System.Net.Mime;
 using System.Text;
-using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using Visualizer.Shared.Models;
 
@@ -9,12 +8,10 @@ namespace Visualizer.API.Clients.Impl;
 internal class IngestionClient : IIngestionClient
 {
     private readonly HttpClient _httpClient;
-    private readonly IConfiguration _configuration;
 
-    public IngestionClient(HttpClient httpClient, IConfiguration configuration)
+    public IngestionClient(HttpClient httpClient)
     {
         _httpClient = httpClient;
-        _configuration = configuration;
     }
 
     public async Task<(HttpResponseMessage IsStreamingResponse, StreamingStatusDto streamingStatus)> IsStreamingRunning()

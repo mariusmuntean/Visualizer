@@ -6,12 +6,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Visualizer.API.Model", "Vis
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Visualizer.API.Services", "Visualizer.API.Services\Visualizer.API.Services.csproj", "{1C1DFCA6-3B6E-4713-98C2-67DB9854B9C4}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docker", "Docker", "{EC7133E4-4F61-449C-97C7-D37B55619C74}"
-	ProjectSection(SolutionItems) = preProject
-		Docker\.dockerignore = Docker\.dockerignore
-		Docker\Dockerfile = Docker\Dockerfile
-	EndProjectSection
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "API", "API", "{012BCBB6-75ED-45F3-AA10-EB0D35F8E887}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Ingestion", "Ingestion", "{8726B23A-06E2-40FA-A690-1132F9BD5619}"
@@ -32,6 +26,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionItems", "SolutionIt
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
 		.gitignore = .gitignore
+		.dockerignore = .dockerignore
+		API.Dockerfile = API.Dockerfile
+		Ingestion.Dockerfile = Ingestion.Dockerfile
 	EndProjectSection
 EndProject
 Global
@@ -77,7 +74,6 @@ Global
 		{1C1DFCA6-3B6E-4713-98C2-67DB9854B9C4} = {012BCBB6-75ED-45F3-AA10-EB0D35F8E887}
 		{9FBD4384-5653-408B-87B4-8248E7AEC351} = {012BCBB6-75ED-45F3-AA10-EB0D35F8E887}
 		{E19906A7-1EDF-4407-B629-85392E6FBB0F} = {012BCBB6-75ED-45F3-AA10-EB0D35F8E887}
-		{EC7133E4-4F61-449C-97C7-D37B55619C74} = {012BCBB6-75ED-45F3-AA10-EB0D35F8E887}
 		{4FA88047-CF0B-43E1-BE90-8184F3B4A465} = {8726B23A-06E2-40FA-A690-1132F9BD5619}
 		{25C30B7A-C35D-46E2-9535-1E37EAF2F674} = {6AF515EB-440D-4BDF-BBC8-0E7AB52E49ED}
 		{EA9338B2-9BFC-45BF-8534-56820359D7A6} = {8726B23A-06E2-40FA-A690-1132F9BD5619}

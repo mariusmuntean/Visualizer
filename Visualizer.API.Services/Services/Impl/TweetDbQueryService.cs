@@ -122,7 +122,7 @@ internal class TweetDbQueryService : ITweetDbQueryService
         if (expression is not null)
         {
             var tweetParameter = Expression.Parameter(typeof(TweetModel), "tweet");
-            var whereExpression = Expression.Lambda<Func<TweetModel, bool>>(expression, new ParameterExpression[] { tweetParameter });
+            var whereExpression = Expression.Lambda<Func<TweetModel, bool>>(expression, new ParameterExpression[] {tweetParameter});
             tweetCollection = tweetCollection.Where(whereExpression);
         }
 
@@ -132,14 +132,18 @@ internal class TweetDbQueryService : ITweetDbQueryService
         // Get the filtered, sorted and paginated tweets.
         var sortField = inputDto.SortField ?? SortField.CreatedAt;
         var orderByDirection = inputDto.SortOrder ?? SortOrder.Descending;
-        Expression<Func<TweetModel, String>> usernameKeySelector = tweet => tweet.Username;
-        Expression<Func<TweetModel, long>> createdAtKeySelector = tweet => tweet.CreatedAt;
         tweetCollection = (orderByDirection, sortField) switch
         {
-            (SortOrder.Ascending, SortField.Username) => tweetCollection.OrderBy(usernameKeySelector),
-            (SortOrder.Ascending, SortField.CreatedAt) => tweetCollection.OrderBy(createdAtKeySelector),
-            (SortOrder.Descending, SortField.Username) => tweetCollection.OrderByDescending(usernameKeySelector),
-            (SortOrder.Descending, SortField.CreatedAt) => tweetCollection.OrderByDescending(createdAtKeySelector),
+            (SortOrder.Ascending, SortField.Username) => tweetCollection.OrderBy(model => model.Username),
+            (SortOrder.Ascending, SortField.CreatedAt) => tweetCollection.OrderBy(model => model.CreatedAt),
+            (SortOrder.Ascending, SortField.PublicMetricsLikesCount) => tweetCollection.OrderBy(model => model.PublicMetricsLikeCount),
+            (SortOrder.Ascending, SortField.PublicMetricsRepliesCount) => tweetCollection.OrderBy(model => model.PublicMetricsReplyCount),
+            (SortOrder.Ascending, SortField.PublicMetricsRetweetsCount) => tweetCollection.OrderBy(model => model.PublicMetricsRetweetCount),
+            (SortOrder.Descending, SortField.Username) => tweetCollection.OrderByDescending(model => model.Username),
+            (SortOrder.Descending, SortField.CreatedAt) => tweetCollection.OrderByDescending(model => model.CreatedAt),
+            (SortOrder.Descending, SortField.PublicMetricsLikesCount) => tweetCollection.OrderByDescending(model => model.PublicMetricsLikeCount),
+            (SortOrder.Descending, SortField.PublicMetricsRepliesCount) => tweetCollection.OrderByDescending(model => model.PublicMetricsReplyCount),
+            (SortOrder.Descending, SortField.PublicMetricsRetweetsCount) => tweetCollection.OrderByDescending(model => model.PublicMetricsRetweetCount),
             _ => tweetCollection
         };
 
@@ -176,6 +180,9 @@ public enum SortField
 {
     CreatedAt,
     Username,
+    PublicMetricsLikesCount,
+    PublicMetricsRetweetsCount,
+    PublicMetricsRepliesCount
 }
 
 public enum SortOrder

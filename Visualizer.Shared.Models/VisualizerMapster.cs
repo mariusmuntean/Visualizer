@@ -26,6 +26,10 @@ public class VisualizerMapster
             .Map(dest => dest.Lang, src => src.Tweet.Lang)
             .Map(dest => dest.Source, src => src.Tweet.Source)
             .Map(dest => dest.OrganicMetrics, src => src.Tweet.OrganicMetrics)
+            .Map(dest => dest.PublicMetricsLikeCount, src => src.Tweet.PublicMetrics.LikeCount)
+            .Map(dest => dest.PublicMetricsQuoteCount, src => src.Tweet.PublicMetrics.QuoteCount)
+            .Map(dest => dest.PublicMetricsReplyCount, src => src.Tweet.PublicMetrics.ReplyCount)
+            .Map(dest => dest.PublicMetricsRetweetCount, src => src.Tweet.PublicMetrics.RetweetCount)
             .Map(dest => dest.ReferencedTweets, src => src.Tweet.ReferencedTweets)
             .Map(dest => dest.GeoLoc,
                 src => new GeoLoc(src.Tweet.Geo.Coordinates.Coordinates[0], src.Tweet.Geo.Coordinates.Coordinates[1]),

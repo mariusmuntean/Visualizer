@@ -20,5 +20,10 @@ public class TweetTypeQl : ObjectGraphType<TweetModel>
         Field(t => t.OrganicMetrics, true, typeof(TweetMetricsTypeQl));
         Field(t => t.GeoLoc, true, typeof(GeoLocTypeQl));
         Field(t => t.Entities, true, typeof(TweetEntitiesTypeQl));
+
+        // Public Metric
+        Field(t => t.PublicMetricsLikeCount, true, typeof(IntGraphType));
+        Field(t => t.PublicMetricsReplyCount, true, typeof(IntGraphType));
+        Field(t => t.PublicMetricsRetweetCount, true, typeof(IntGraphType));
     }
 }

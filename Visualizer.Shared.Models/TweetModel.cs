@@ -26,7 +26,7 @@ public class TweetModel
 
     [Indexed]
     public string AuthorId { get; set; }
-    
+
     [Indexed]
     public string Username { get; set; }
 
@@ -66,6 +66,23 @@ public class TweetModel
     /// </summary>
     [Indexed(CascadeDepth = 1)]
     public TweetMetrics OrganicMetrics { get; set; }
+
+    // /// <summary>
+    // /// Public engagement metrics for the Tweet at the time of the request.
+    // /// </summary>
+    //[Indexed(CascadeDepth = 2)]
+    //public TweetPublicMetrics PublicMetrics { get; set; }
+    [Indexed]
+    public int PublicMetricsLikeCount { get; set; }
+
+    [Indexed]
+    public int PublicMetricsQuoteCount { get; set; }
+
+    [Indexed]
+    public int PublicMetricsReplyCount { get; set; }
+
+    [Indexed]
+    public int PublicMetricsRetweetCount { get; set; }
 
     /// <summary>
     /// A list of Tweets this Tweet refers to. For example, if the parent Tweet is a Retweet, a Retweet with comment (also known as Quoted Tweet) or a Reply, it will include the related Tweet referenced to by its parent.

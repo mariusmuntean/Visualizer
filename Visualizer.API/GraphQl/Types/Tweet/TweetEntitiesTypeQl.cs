@@ -9,6 +9,6 @@ public class TweetEntitiesTypeQl : ObjectGraphType<TweetEntities>
     {
         Field(e => e.Hashtags, true, typeof(ListGraphType<StringGraphType>));
         Field(e => e.Cashtags, true, typeof(ListGraphType<CashtagEntityTypeQl>));
-        Field(e => e.Mentions, true, typeof(ListGraphType<UserMentionTypeQl>));
+        Field(e => e.Mentions, true, typeof(ListGraphType<StringGraphType>));
     }
 }

@@ -7,7 +7,7 @@
 	<ItemGroup>
 		<PackageReference Include="Mapster" Version="7.3.0" />
 		<PackageReference Include="NRedisGraph" Version="1.7.0" />
-		<PackageReference Include="Redis.OM" Version="0.2.0" />
+		<PackageReference Include="Redis.OM" Version="0.2.3" />
 		<PackageReference Include="RedLock.net" Version="2.3.2" />
 		<PackageReference Include="Serilog.AspNetCore" Version="5.0.0" />
 		<PackageReference Include="System.Reactive" Version="5.0.0" />

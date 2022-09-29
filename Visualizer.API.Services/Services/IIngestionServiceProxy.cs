@@ -5,7 +5,7 @@ namespace Visualizer.API.Services.Services;
 
 public interface IIngestionServiceProxy : IHostedService
 {
-    bool? IsStreaming { get; }
+    Task<bool> IsStreaming();
     Task<HttpResponseMessage> StartStreaming();
     Task<HttpResponseMessage> StopStreaming();
     IObservable<StreamingStatusDto> GetStreamingStatusObservable();

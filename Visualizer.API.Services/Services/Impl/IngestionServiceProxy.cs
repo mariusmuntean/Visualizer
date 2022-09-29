@@ -30,7 +30,17 @@ internal class IngestionServiceProxy : IIngestionServiceProxy
         _streamingStatusStream = new ReplaySubject<StreamingStatusDto>(1);
     }
 
-    public bool? IsStreaming { get; private set; }
+    public async Task<bool> IsStreaming()
+    {
+        var (isStreamingResponse, streamingStatus) = await _ingestionClient.IsStreamingRunning();
+        if (isStreamingResponse.IsSuccessStatusCode)
+        {
+            return streamingStatus.IsStreaming;
+        }
+
+        _logger.LogWarning("Failed to retrieve streaming status. Http response status was {ResponseStatus}", isStreamingResponse.StatusCode);
+        return false;
+    }
 
     public async Task<HttpResponseMessage> StartStreaming()
     {
@@ -64,18 +74,8 @@ internal class IngestionServiceProxy : IIngestionServiceProxy
             var isStreaming = bool.Parse(Encoding.UTF8.GetString(message.Message));
             _logger.LogInformation("Ingestion service status changed to: {IsStreaming}", isStreaming);
 
-            IsStreaming = isStreaming;
             PublishCurrentStreamingStatus(isStreaming);
         });
-
-
-        // Get current streaming status
-        var (isStreamingResponse, streamingStatus) = await _ingestionClient.IsStreamingRunning().ConfigureAwait(false);
-        if (isStreamingResponse.IsSuccessStatusCode)
-        {
-            IsStreaming ??= streamingStatus.IsStreaming; // assign the new value only if IsStreaming has no value. IsStreaming may already have a value if one was set via PubSub.
-            _logger.LogInformation("{ServiceName} failed to retrieve the streaming service status", nameof(IngestionServiceProxy));
-        }
 
         _logger.LogInformation("{ServiceName} started", nameof(IngestionServiceProxy));
     }

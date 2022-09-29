@@ -9,9 +9,8 @@ public class StreamingQuery : ObjectGraphType
     {
         var ingestionService = provider.CreateScope().ServiceProvider.GetService<IIngestionServiceProxy>();
 
-        Field<BooleanGraphType>("isStreaming",
-            "Whether or not the live ingestion is running.",
-            resolve: context => ingestionService.IsStreaming
-        );
+        Field<BooleanGraphType>("isStreaming")
+            .Description("Whether or not the live ingestion is running.")
+            .ResolveAsync(async ctx => await ingestionService.IsStreaming().ConfigureAwait(false));
     }
 }

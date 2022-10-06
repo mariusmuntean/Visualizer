@@ -34,14 +34,17 @@ public class TweetModel
     /// UTC ticks when the Tweet was created.
     /// </summary>
     /// <value></value>
-    [Indexed(Sortable = true)]
+    [Indexed(Sortable = true, Aggregatable = true)]
     public long CreatedAt { get; set; }
 
     /// <summary>
     /// Contains details about the location tagged by the user in this Tweet, if they specified one.
     /// </summary>
-    [Indexed]
+    [Indexed(Aggregatable = true)]
     public GeoLoc? GeoLoc { get; set; }
+
+    [Indexed] // src https://github.com/redis/redis-om-node/blob/main/README.md
+    public string HasGeoLoc { get; set; }
 
     /// <summary>
     /// Language of the Tweet, if detected by Twitter. Returned as a BCP47 language tag.

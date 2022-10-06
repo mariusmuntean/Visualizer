@@ -7,4 +7,5 @@ public interface ITweetDbQueryService
 {
     Task<List<TweetModel>> FindTweets(FindTweetsInputDto inputDto);
     Task<TweetModelsPage> FindTweetsWithExpression(FindTweetsInputDto inputDto);
+    Task<TweetModelsPage> FindTweetsWithAggregation(FindTweetsInputDto inputDto);
 }

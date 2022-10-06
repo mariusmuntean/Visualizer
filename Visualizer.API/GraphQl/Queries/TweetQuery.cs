@@ -22,6 +22,7 @@ public class TweetQuery : ObjectGraphType
             {
                 var filter = context.GetArgument<FindTweetsInputDto>("filter");
                 var tweetModelsPage = await tweetDbQueryService.FindTweetsWithExpression(filter).ConfigureAwait(false);
+                //var tweetModelsPage = await tweetDbQueryService.FindTweetsWithAggregation(filter).ConfigureAwait(false);
                 Console.WriteLine(JsonConvert.SerializeObject(tweetModelsPage));
                 return tweetModelsPage;
             });

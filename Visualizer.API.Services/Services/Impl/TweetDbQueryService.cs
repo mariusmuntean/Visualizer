@@ -1,6 +1,8 @@
 using System.Linq.Expressions;
 using Microsoft.Extensions.Logging;
 using Redis.OM;
+using Redis.OM.Aggregation.AggregationPredicates;
+using Redis.OM.Modeling;
 using Visualizer.Shared.Models;
 
 namespace Visualizer.API.Services.Services.Impl;
@@ -119,12 +121,21 @@ internal class TweetDbQueryService : ITweetDbQueryService
             }
         }
 
+        // GEO
+        if (inputDto.OnlyWithGeo.HasValue)
+        {
+            var hasGeoLocString = inputDto.OnlyWithGeo.Value ? "1" : "0";
+            Expression<Func<TweetModel, bool>> filterByGeo = tweet => tweet.HasGeoLoc == hasGeoLocString;
+            expression = expression is null ? filterByGeo.Body : Expression.AndAlso(expression, filterByGeo.Body);
+        }
+
         if (expression is not null)
         {
             var tweetParameter = Expression.Parameter(typeof(TweetModel), "tweet");
             var whereExpression = Expression.Lambda<Func<TweetModel, bool>>(expression, new ParameterExpression[] {tweetParameter});
             tweetCollection = tweetCollection.Where(whereExpression);
         }
+
 
         // Get the total count of the filtered tweets.
         var count = await tweetCollection.CountAsync();
@@ -153,8 +164,99 @@ internal class TweetDbQueryService : ITweetDbQueryService
         tweetCollection = tweetCollection.Skip(skipAmount).Take(pageSize);
         _logger.LogInformation("Generated Redis query {Query}", tweetCollection.Expression.ToString());
 
+
         var tweetsIlist = await tweetCollection.ToListAsync();
-        return new TweetModelsPage(count, tweetsIlist.ToList());
+        var tweetModels = tweetsIlist.ToList();
+        return new TweetModelsPage(count, tweetModels);
+    }
+
+    public async Task<TweetModelsPage> FindTweetsWithAggregation(FindTweetsInputDto inputDto)
+    {
+        var tweetCollection = _redisConnectionProvider.RedisCollection<TweetModel>();
+        var tweetAggregation = _redisConnectionProvider.AggregationSet<TweetModel>();
+
+        Expression expression = null;
+
+        if (!string.IsNullOrWhiteSpace(inputDto.TweetId))
+        {
+            tweetAggregation = tweetAggregation.Where(result => result.RecordShell.Id == inputDto.TweetId);
+        }
+
+        if (!string.IsNullOrWhiteSpace(inputDto.AuthorId))
+        {
+            tweetAggregation = tweetAggregation.Where(result => result.RecordShell.AuthorId == inputDto.AuthorId);
+        }
+
+        if (!string.IsNullOrWhiteSpace(inputDto.Username))
+        {
+            tweetAggregation = tweetAggregation.Where(result => result.RecordShell.Username == inputDto.Username);
+        }
+
+        if (!string.IsNullOrWhiteSpace(inputDto.SearchTerm))
+        {
+            tweetAggregation = tweetAggregation.Where(result => result.RecordShell.Text == inputDto.SearchTerm);
+            // OR
+            // tweetAggregation = tweetAggregation.Apply(result => result.RecordShell.Text.Contains(inputDto.SearchTerm), "SearchTermResults");
+        }
+
+        if (inputDto.StartingFrom is not null)
+        {
+            var startingFromTicks = inputDto.StartingFrom.Value.ToUniversalTime().Ticks;
+            tweetAggregation = tweetAggregation.Where(result => result.RecordShell.CreatedAt >= startingFromTicks);
+        }
+
+        if (inputDto.UpTo is not null)
+        {
+            var upToTicks = inputDto.UpTo.Value.ToUniversalTime().Ticks;
+            tweetAggregation = tweetAggregation.Where(result => result.RecordShell.CreatedAt <= upToTicks);
+        }
+
+        if (inputDto.Hashtags is not null && inputDto.Hashtags.Length > 0)
+        {
+            foreach (var requiredHashtag in inputDto.Hashtags.Where(h => !string.IsNullOrEmpty(h)))
+            {
+                tweetAggregation = tweetAggregation.Where(result => result.RecordShell.Entities.Hashtags.Contains(requiredHashtag));
+            }
+        }
+
+        // GEO
+        if (inputDto.OnlyWithGeo.HasValue)
+        {
+            // tweetAggregation = tweetAggregation.Apply(result => ApplyFunctions.Exists(result.RecordShell.GeoLoc), "GeoPresentResults");
+        }
+
+        // Get the total count of the filtered tweets.
+        var count = tweetAggregation.Count(); // another overload?
+
+        // Get the sorted tweets.
+        var sortField = inputDto.SortField ?? SortField.CreatedAt;
+        var orderByDirection = inputDto.SortOrder ?? SortOrder.Descending;
+        /*tweetAggregation = (orderByDirection, sortField) switch
+        {
+            (SortOrder.Ascending, SortField.Username) => tweetAggregation.OrderBy(model => model.RecordShell.Username),
+            (SortOrder.Ascending, SortField.CreatedAt) => tweetAggregation.OrderBy(model => model.RecordShell.CreatedAt),
+            (SortOrder.Ascending, SortField.PublicMetricsLikesCount) => tweetAggregation.OrderBy(model => model.RecordShell.PublicMetricsLikeCount),
+            (SortOrder.Ascending, SortField.PublicMetricsRepliesCount) => tweetAggregation.OrderBy(model => model.RecordShell.PublicMetricsReplyCount),
+            (SortOrder.Ascending, SortField.PublicMetricsRetweetsCount) => tweetAggregation.OrderBy(model => model.RecordShell.PublicMetricsRetweetCount),
+            (SortOrder.Descending, SortField.Username) => tweetAggregation.OrderByDescending(model => model.RecordShell.Username),
+            (SortOrder.Descending, SortField.CreatedAt) => tweetAggregation.OrderByDescending(model => model.RecordShell.CreatedAt),
+            (SortOrder.Descending, SortField.PublicMetricsLikesCount) => tweetAggregation.OrderByDescending(model => model.RecordShell.PublicMetricsLikeCount),
+            (SortOrder.Descending, SortField.PublicMetricsRepliesCount) => tweetAggregation.OrderByDescending(model => model.RecordShell.PublicMetricsReplyCount),
+            (SortOrder.Descending, SortField.PublicMetricsRetweetsCount) => tweetAggregation.OrderByDescending(model => model.RecordShell.PublicMetricsRetweetCount),
+            _ => tweetAggregation
+        };*/
+
+        // Get the paginated tweets.
+        var pageSize = inputDto.PageSize ?? 100;
+        var pageNumber = inputDto.PageNumber ?? 0;
+        var skipAmount = pageSize * pageNumber > count ? 0 : pageSize * pageNumber;
+        // tweetAggregation = tweetAggregation.Skip(skipAmount).Take(pageSize).CloseGroup(); // Maybe not this way
+
+        _logger.LogInformation("Generated Redis query {Query}", tweetAggregation.Expression.ToString());
+
+        tweetAggregation = tweetAggregation.LoadAll();
+        var aggregationResults = await tweetAggregation.ToListAsync();
+        return new TweetModelsPage(count, aggregationResults.Select(result => result.Hydrate()).ToList());
     }
 }
 
@@ -165,6 +267,8 @@ public class FindTweetsInputDto
     public string Username { get; set; }
     public string SearchTerm { get; set; }
     public string[] Hashtags { set; get; }
+
+    public bool? OnlyWithGeo { get; set; }
 
     public int? PageSize { get; set; }
     public int? PageNumber { get; set; }

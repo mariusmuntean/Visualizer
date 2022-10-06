@@ -1,3 +1,4 @@
+using System.Globalization;
 using Serilog;
 using Serilog.Events;
 using Visualizer.API;
@@ -6,6 +7,9 @@ using Visualizer.API.GraphQl;
 using Visualizer.API.Model;
 using Visualizer.API.Services;
 using Visualizer.Shared.Models;
+
+CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
+CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.InvariantCulture;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Configuration

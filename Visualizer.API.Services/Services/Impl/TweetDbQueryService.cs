@@ -122,11 +122,16 @@ internal class TweetDbQueryService : ITweetDbQueryService
         }
 
         // GEO
-        if (inputDto.OnlyWithGeo.HasValue)
+        if (inputDto.OnlyWithGeo.HasValue || inputDto.GeoFilter is not null)
         {
             var hasGeoLocString = inputDto.OnlyWithGeo.Value ? "1" : "0";
             Expression<Func<TweetModel, bool>> filterByGeo = tweet => tweet.HasGeoLoc == hasGeoLocString;
             expression = expression is null ? filterByGeo.Body : Expression.AndAlso(expression, filterByGeo.Body);
+
+            if (inputDto.GeoFilter is not null)
+            {
+                tweetCollection = tweetCollection.GeoFilter(model => model.GeoLoc, inputDto.GeoFilter.Longitude, inputDto.GeoFilter.Latitude, inputDto.GeoFilter.RadiusKm, GeoLocDistanceUnit.Kilometers);
+            }
         }
 
         if (expression is not null)
@@ -269,6 +274,7 @@ public class FindTweetsInputDto
     public string[] Hashtags { set; get; }
 
     public bool? OnlyWithGeo { get; set; }
+    public GeoFilter? GeoFilter { get; set; }
 
     public int? PageSize { get; set; }
     public int? PageNumber { get; set; }
@@ -279,6 +285,8 @@ public class FindTweetsInputDto
     public SortField? SortField { get; set; }
     public SortOrder? SortOrder { get; set; }
 }
+
+public record GeoFilter(double Latitude, double Longitude, double RadiusKm);
 
 public enum SortField
 {

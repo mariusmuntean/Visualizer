@@ -163,7 +163,7 @@ internal class TweetDbQueryService : ITweetDbQueryService
             _ => tweetCollection
         };
 
-        var pageSize = inputDto.PageSize ?? 100;
+        var pageSize = inputDto.PageSize ?? 10;
         var pageNumber = inputDto.PageNumber ?? 0;
         var skipAmount = pageSize * pageNumber > count ? 0 : pageSize * pageNumber;
         tweetCollection = tweetCollection.Skip(skipAmount).Take(pageSize);

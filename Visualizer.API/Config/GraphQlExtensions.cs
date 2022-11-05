@@ -1,10 +1,6 @@
 using GraphQL;
 using GraphQL.Execution;
-using GraphQL.Instrumentation;
 using GraphQL.Validation;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using Serilog;
 using Visualizer.API.GraphQl;
 
 namespace Visualizer.API.Config;
@@ -50,9 +46,6 @@ public static class GraphQlExtensions
 
         public Task AfterExecutionAsync(IExecutionContext context)
         {
-            // Log.Logger.Information("Executed {OperationType} named '{OperationName}' with variables {Variables}. Metrics {Metrics}", context.Operation.Operation,
-            //     context.Operation.Name, JArray.FromObject(context.Variables).ToString(Formatting.None),
-            //     JsonConvert.SerializeObject(context.Metrics.Finish()?.FirstOrDefault() ?? new PerfRecord("none", "none", 0)));
             return Task.CompletedTask;
         }
     }

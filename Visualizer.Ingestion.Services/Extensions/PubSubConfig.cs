@@ -2,8 +2,6 @@ using System.Net;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using StackExchange.Redis;
-using Visualizer.Ingestion.Services.Services;
-using Visualizer.Ingestion.Services.Services.Impl;
 
 namespace Visualizer.Ingestion.Services.Extensions;
 

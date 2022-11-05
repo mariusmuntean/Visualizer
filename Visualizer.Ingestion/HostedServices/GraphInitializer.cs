@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using NRedisGraph;
 using Visualizer.Shared.Models;
 
@@ -6,6 +7,7 @@ namespace Visualizer.Ingestion.HostedServices;
 /// <summary>
 /// Initializes the graph database, e.g. by creating indices.
 /// </summary>
+[SuppressMessage("Reliability", "CA2007:Consider calling ConfigureAwait on the awaited task")]
 public class GraphInitializer : IHostedService
 {
     private readonly RedisGraph _redisGraph;

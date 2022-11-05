@@ -13,7 +13,7 @@
 		<PackageReference Include="GraphQL.Server.All" Version="7.1.1" />
 		<PackageReference Include="Mapster" Version="7.3.0" />
 		<PackageReference Include="NRedisGraph" Version="1.8.0" />
-		<PackageReference Include="Redis.OM" Version="0.2.3" />
+		<PackageReference Include="Redis.OM" Version="0.3.1" />
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
 		<PackageReference Include="TweetinviAPI" Version="5.0.4" />
 	</ItemGroup>

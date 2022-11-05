@@ -7,7 +7,7 @@
 
     <ItemGroup>
       <PackageReference Include="Mapster" Version="7.3.0" />
-      <PackageReference Include="Redis.OM" Version="0.2.3" />
+      <PackageReference Include="Redis.OM" Version="0.3.1" />
       <PackageReference Include="TweetinviAPI" Version="5.0.4" />
     </ItemGroup>
 

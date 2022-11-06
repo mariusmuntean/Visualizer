@@ -4,6 +4,7 @@ using Visualizer.API.GraphQl.Types.Input;
 using Visualizer.API.GraphQl.Types.Tweet;
 using Visualizer.API.Services.Services;
 using Visualizer.API.Services.Services.Impl;
+// ReSharper disable ClassNeverInstantiated.Global
 
 namespace Visualizer.API.GraphQl.Queries;
 
@@ -20,8 +21,8 @@ public class TweetQuery : ObjectGraphType
         resolve: async context =>
             {
                 var filter = context.GetArgument<FindTweetsInputDto>("filter");
-                var tweetModelsPage = await tweetDbQueryService.FindTweetsWithExpression(filter).ConfigureAwait(false);
-                //var tweetModelsPage = await tweetDbQueryService.FindTweetsWithAggregation(filter).ConfigureAwait(false);
+                // var tweetModelsPage = await tweetDbQueryService.FindTweetsWithExpression(filter).ConfigureAwait(false);
+                var tweetModelsPage = await tweetDbQueryService.FindTweets(filter).ConfigureAwait(false);
                 return tweetModelsPage;
             });
     }

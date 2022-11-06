@@ -16,6 +16,95 @@ internal class TweetDbQueryService : ITweetDbQueryService
         _logger = logger;
     }
 
+    public async Task<TweetModelsPage> FindTweets(FindTweetsInputDto inputDto)
+    {
+        var tweetCollection = _redisConnectionProvider.RedisCollection<TweetModel>();
+
+        if (!string.IsNullOrWhiteSpace(inputDto.TweetId))
+        {
+            tweetCollection = tweetCollection.Where(t => t.Id == inputDto.TweetId);
+        }
+
+        if (!string.IsNullOrWhiteSpace(inputDto.AuthorId))
+        {
+            tweetCollection = tweetCollection.Where(t => t.AuthorId == inputDto.AuthorId);
+        }
+
+        if (!string.IsNullOrWhiteSpace(inputDto.Username))
+        {
+            tweetCollection = tweetCollection.Where(t => t.Username == inputDto.Username);
+        }
+
+        if (!string.IsNullOrWhiteSpace(inputDto.SearchTerm))
+        {
+            tweetCollection = tweetCollection.Where(t => t.Text == inputDto.SearchTerm);
+        }
+
+        if (inputDto.StartingFrom is not null)
+        {
+            var startingFromTicks = inputDto.StartingFrom.Value.ToUniversalTime().Ticks;
+            tweetCollection = tweetCollection.Where(t => t.CreatedAt >= startingFromTicks);
+        }
+
+        if (inputDto.UpTo is not null)
+        {
+            var upToTicks = inputDto.UpTo.Value.ToUniversalTime().Ticks;
+            tweetCollection = tweetCollection.Where(t => t.CreatedAt <= upToTicks);
+        }
+
+        if (inputDto.Hashtags is not null && inputDto.Hashtags.Length > 0)
+        {
+            foreach (var requiredHashtag in inputDto.Hashtags.Where(h => !string.IsNullOrEmpty(h)))
+            {
+                tweetCollection = tweetCollection.Where(t => t.Entities.Hashtags.Contains(requiredHashtag));
+            }
+        }
+
+        // GEO
+        if (inputDto.OnlyWithGeo.HasValue || inputDto.GeoFilter is not null)
+        {
+            var hasGeoLocString = inputDto.OnlyWithGeo.Value ? "1" : "0";
+            tweetCollection = tweetCollection.Where(t => t.HasGeoLoc == hasGeoLocString);
+
+            if (inputDto.GeoFilter is not null)
+            {
+                tweetCollection = tweetCollection.GeoFilter(model => model.GeoLoc, inputDto.GeoFilter.Longitude, inputDto.GeoFilter.Latitude, inputDto.GeoFilter.RadiusKm, GeoLocDistanceUnit.Kilometers);
+            }
+        }
+
+        // Get the total count of the filtered tweets.
+        var count = await tweetCollection.CountAsync().ConfigureAwait(false);
+
+        // Sort tweets.
+        var sortField = inputDto.SortField ?? SortField.CreatedAt;
+        var orderByDirection = inputDto.SortOrder ?? SortOrder.Descending;
+        tweetCollection = (orderByDirection, sortField) switch
+        {
+            (SortOrder.Ascending, SortField.Username) => tweetCollection.OrderBy(model => model.Username),
+            (SortOrder.Ascending, SortField.CreatedAt) => tweetCollection.OrderBy(model => model.CreatedAt),
+            (SortOrder.Ascending, SortField.PublicMetricsLikesCount) => tweetCollection.OrderBy(model => model.PublicMetricsLikeCount),
+            (SortOrder.Ascending, SortField.PublicMetricsRepliesCount) => tweetCollection.OrderBy(model => model.PublicMetricsReplyCount),
+            (SortOrder.Ascending, SortField.PublicMetricsRetweetsCount) => tweetCollection.OrderBy(model => model.PublicMetricsRetweetCount),
+            (SortOrder.Descending, SortField.Username) => tweetCollection.OrderByDescending(model => model.Username),
+            (SortOrder.Descending, SortField.CreatedAt) => tweetCollection.OrderByDescending(model => model.CreatedAt),
+            (SortOrder.Descending, SortField.PublicMetricsLikesCount) => tweetCollection.OrderByDescending(model => model.PublicMetricsLikeCount),
+            (SortOrder.Descending, SortField.PublicMetricsRepliesCount) => tweetCollection.OrderByDescending(model => model.PublicMetricsReplyCount),
+            (SortOrder.Descending, SortField.PublicMetricsRetweetsCount) => tweetCollection.OrderByDescending(model => model.PublicMetricsRetweetCount),
+            _ => tweetCollection
+        };
+
+        // Paginate tweets.
+        var pageSize = inputDto.PageSize ?? 10;
+        var pageNumber = inputDto.PageNumber ?? 0;
+        var skipAmount = pageSize * pageNumber > count ? 0 : pageSize * pageNumber;
+        tweetCollection = tweetCollection.Skip(skipAmount).Take(pageSize);
+
+        // Produce tweets.
+        var tweetsIlist = await tweetCollection.ToListAsync();
+        var tweetModels = tweetsIlist.ToList();
+        return new TweetModelsPage(count, tweetModels);
+    }
+
     public async Task<TweetModelsPage> FindTweetsWithExpression(FindTweetsInputDto inputDto)
     {
         var tweetCollection = _redisConnectionProvider.RedisCollection<TweetModel>();

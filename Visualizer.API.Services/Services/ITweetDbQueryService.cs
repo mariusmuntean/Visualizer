@@ -5,4 +5,5 @@ namespace Visualizer.API.Services.Services;
 public interface ITweetDbQueryService
 {
     Task<TweetModelsPage> FindTweetsWithExpression(FindTweetsInputDto inputDto);
+    Task<TweetModelsPage> FindTweets(FindTweetsInputDto inputDto);
 }

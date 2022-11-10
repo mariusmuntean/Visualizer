@@ -4,3 +4,5 @@ obj/
 riderModule.iml
 /_ReSharper.Caches/
 appsettings.local.json
+/Visualizer.API.Tests/LoadTests/redis-result.html
+/Visualizer.API.Tests/LoadTests/result.html

@@ -22,7 +22,7 @@ internal class TweetDbService : ITweetDbService
         _tweetCollection = _redisConnectionProvider.RedisCollection<TweetModel>();
     }
 
-    public async Task Store(TweetV2ReceivedEventArgs tweetV2ReceivedEventArgs)
+    public async Task Store(TweetV2EventArgs tweetV2ReceivedEventArgs)
     {
         string internalId;
         try

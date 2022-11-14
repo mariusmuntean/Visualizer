@@ -16,7 +16,9 @@ public static class IngestionServicesRegistrator
         webApplicationBuilder.Services.AddSingleton<IHashtagRankedMessagePublisher, HashtagRankedMessagePublisher>();
 
         // Ingestion
-        webApplicationBuilder.Services.AddSingleton<ITwitterStreamService, TwitterStreamService>();
+        //webApplicationBuilder.Services.AddSingleton<ITwitterStreamService, TwitterStreamService>();
+        webApplicationBuilder.Services.AddSingleton<ITwitterStreamService, TwitterFilteredStreamService>();
+
         webApplicationBuilder.Services.AddSingleton<ITweetGraphService, TweetGraphService>();
         webApplicationBuilder.Services.AddSingleton<ITweetDbService, TweetDbService>();
         webApplicationBuilder.Services.AddSingleton<ITweetHashtagService, TweetHashtagService>();

@@ -13,7 +13,7 @@ internal class TweetGraphService : ITweetGraphService
         _redisGraph = redisGraph;
     }
 
-    public async Task AddNodes(TweetV2ReceivedEventArgs tweetV2ReceivedEventArgs)
+    public async Task AddNodes(TweetV2EventArgs tweetV2ReceivedEventArgs)
     {
         var tweet = tweetV2ReceivedEventArgs.Tweet;
         var includes = tweetV2ReceivedEventArgs.Includes;

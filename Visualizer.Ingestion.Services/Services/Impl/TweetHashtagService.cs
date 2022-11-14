@@ -18,7 +18,7 @@ internal class TweetHashtagService : ITweetHashtagService
         _logger = logger;
     }
 
-    public async Task AddHashtags(TweetV2ReceivedEventArgs tweetV2ReceivedEventArgs)
+    public async Task AddHashtags(TweetV2EventArgs tweetV2ReceivedEventArgs)
     {
         if (!tweetV2ReceivedEventArgs.Tweet?.Entities?.Hashtags?.Any() ?? true)
         {

@@ -15,7 +15,7 @@ public class VisualizerMapster
         TypeAdapterConfig<DateTimeOffset, DateTime>.NewConfig()
             .MapWith(offset => offset.DateTime)
             ;
-        TypeAdapterConfig<TweetV2ReceivedEventArgs, TweetModel>.NewConfig()
+        TypeAdapterConfig<TweetV2EventArgs, TweetModel>.NewConfig()
             .Map(dest => dest.Id, src => src.Tweet.Id)
             .Map(dest => dest.AuthorId, src => src.Tweet.AuthorId)
             .Map(dest => dest.Text, src => src.Tweet.Text)

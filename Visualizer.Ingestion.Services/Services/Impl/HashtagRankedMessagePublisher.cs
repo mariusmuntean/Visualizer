@@ -12,7 +12,6 @@ internal class HashtagRankedMessagePublisher : IHashtagRankedMessagePublisher
     public HashtagRankedMessagePublisher(ISubscriber subscriber)
     {
         _subscriber = subscriber;
-
         // ToDo: use a private System.Threading.Channel to decouple receiving and publishing messages
     }
 

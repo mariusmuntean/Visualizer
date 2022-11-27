@@ -102,7 +102,7 @@ internal class TwitterFilteredStreamService : ITwitterStreamService
 
         _ = _filteredStream.StartAsync(parameters).ContinueWith((task, o) =>
         {
-            var state = o as (IRedLock l, ILogger<TwitterStreamService> log)?;
+            var state = o as (IRedLock l, ILogger<TwitterFilteredStreamService> log)?;
             if (state is null)
             {
                 return;

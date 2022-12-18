@@ -40,6 +40,9 @@ internal class TwitterFilteredStreamService : ITwitterStreamService
 
     public async Task ProcessSampleStream()
     {
+        // ToDo: refactor to allow switching between filtered and sampled streams
+        // ToDo: expose which stream type is currently used and which rules(filtered stream) and properties are used.
+        // ToDo: when switching to the filtered stream, allow specifying the rules.
         if (IsStreaming)
         {
             _logger.LogInformation("Streaming is already running. Nothing to start");
@@ -71,10 +74,9 @@ internal class TwitterFilteredStreamService : ITwitterStreamService
         }
 
         // See https://developer.twitter.com/en/docs/twitter-api/tweets/filtered-stream/integrate/build-a-rule
-        var addRulesResponse = await _twitterClient.StreamsV2.AddRulesToFilteredStreamAsync(new[]
-        {
-            new FilteredStreamRuleConfig("place_country:US","Tweets from the United States")
-        }).ConfigureAwait(false);
+        var addRulesResponse = await _twitterClient.StreamsV2.AddRulesToFilteredStreamAsync(new[] {new FilteredStreamRuleConfig("place_country:US", "Tweets from the United States")}).ConfigureAwait(false);
+
+        _logger.LogInformation("Added filtered stream rules {Rules}", JsonConvert.SerializeObject(addRulesResponse, Formatting.Indented));
 
         _filteredStream = _twitterClient.StreamsV2.CreateFilteredStream();
         _filteredStream.TweetReceived += async (sender, args) =>

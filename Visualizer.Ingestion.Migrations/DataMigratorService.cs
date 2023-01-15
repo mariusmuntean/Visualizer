@@ -24,19 +24,26 @@ class DataMigratorService : IDataMigratorService
 
     public async Task MigrateData()
     {
+        // Multiple service instances might try to perform the migrations.
+        // Only one should be performing the changes. The others should be blocked until the migrations have been performed and it is safe to work with the data again.
+        // I'm using the RedLock distributed lock algorithm - https://github.com/samcook/RedLock.net - which guarantees that everyone can eventually acquire the lock (deadlock free).
+
+        // Try to obtain a distributed lock and block until the lock is acquired - Note that 'await using' that disposes the lock when this method finishes..
+        var expiryTime = TimeSpan.FromSeconds(30); // Expiry time when the service crashes
+        var waitTime = TimeSpan.FromTicks(long.MaxValue); // Wait 'forever' to acquire the lock. Maybe use the optional cancellation token to cancel the wait.
+        var retryTime = TimeSpan.FromSeconds(2);
+        await using var performMigrationsLock = await _distributedLockFactory.CreateLockAsync(PerformMigrationsLock, expiryTime, waitTime, retryTime);
+        if (!performMigrationsLock.IsAcquired)
+        {
+            // This should never happen so let the service instance crash and burn.
+            throw new Exception("Couldn't acquire distributed lock for performing the data migrations. This should not happen...");
+        }
+
+        // Perform migrations
         var dataMigrationScriptsToExecute = await GetMigrationScriptsToExecute();
         if (!dataMigrationScriptsToExecute.Any())
         {
             _logger.LogInformation("No data migration scripts to run");
-            return;
-        }
-
-        // Perform the migrations only if a distributed lock can be acquired.
-        // This synchronizes multiple service instances that might be trying to perform the migrations simultaneously.
-        await using var performMigrationsLock = await _distributedLockFactory.CreateLockAsync(PerformMigrationsLock, TimeSpan.FromSeconds(5));
-        if (!performMigrationsLock.IsAcquired)
-        {
-            _logger.LogInformation("Couldn't acquire distributed lock for performing the data migrations. Leaving ...");
             return;
         }
 
@@ -100,6 +107,13 @@ class DataMigratorService : IDataMigratorService
         return await File.ReadAllTextAsync(scriptPath);
     }
 
+    /// <summary>
+    /// Decides the names of the migration scripts that still need to be executed.
+    /// Note: execute the scripts exactly in the order that they're returned by this method.
+    /// </summary>
+    /// <returns>An array of the migration scripts to be executed.</returns>
+    /// <exception cref="Exception">If more scripts were already executed than are actually available.</exception>
+    /// <exception cref="Exception">If scripts were executed that aren't actually available.</exception>
     private async Task<string[]> GetMigrationScriptsToExecute()
     {
         // Determine all available migration scripts

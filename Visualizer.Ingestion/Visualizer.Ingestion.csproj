@@ -21,6 +21,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\Visualizer.Ingestion.Migrations\Visualizer.Ingestion.Migrations.csproj" />
       <ProjectReference Include="..\Visualizer.Ingestion.Services\Visualizer.Ingestion.Services.csproj" />
     </ItemGroup>
 

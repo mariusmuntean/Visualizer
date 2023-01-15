@@ -34,6 +34,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionItems", "SolutionIt
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Visualizer.API.Tests", "Visualizer.API.Tests\Visualizer.API.Tests.csproj", "{3B2E7EF1-4170-4E03-9F63-BCBFE455A17E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Visualizer.Ingestion.Migrations", "Visualizer.Ingestion.Migrations\Visualizer.Ingestion.Migrations.csproj", "{E8BB1719-0165-4BB6-90D0-3FD791CF7834}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -76,6 +78,10 @@ Global
 		{3B2E7EF1-4170-4E03-9F63-BCBFE455A17E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3B2E7EF1-4170-4E03-9F63-BCBFE455A17E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3B2E7EF1-4170-4E03-9F63-BCBFE455A17E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E8BB1719-0165-4BB6-90D0-3FD791CF7834}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E8BB1719-0165-4BB6-90D0-3FD791CF7834}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E8BB1719-0165-4BB6-90D0-3FD791CF7834}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E8BB1719-0165-4BB6-90D0-3FD791CF7834}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{1C1DFCA6-3B6E-4713-98C2-67DB9854B9C4} = {012BCBB6-75ED-45F3-AA10-EB0D35F8E887}
@@ -87,5 +93,6 @@ Global
 		{23860597-4726-4B96-8F18-0BB645783E6A} = {6AF515EB-440D-4BDF-BBC8-0E7AB52E49ED}
 		{D72817DC-2EAA-446E-96F1-0D249995DEEB} = {012BCBB6-75ED-45F3-AA10-EB0D35F8E887}
 		{3B2E7EF1-4170-4E03-9F63-BCBFE455A17E} = {012BCBB6-75ED-45F3-AA10-EB0D35F8E887}
+		{E8BB1719-0165-4BB6-90D0-3FD791CF7834} = {8726B23A-06E2-40FA-A690-1132F9BD5619}
 	EndGlobalSection
 EndGlobal

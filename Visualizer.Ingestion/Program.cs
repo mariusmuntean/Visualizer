@@ -1,6 +1,7 @@
 using System.Globalization;
 using Serilog;
 using Visualizer.Ingestion;
+using Visualizer.Ingestion.Migrations;
 using Visualizer.Ingestion.Services;
 using Visualizer.Shared.Models;
 
@@ -16,6 +17,7 @@ builder.Configuration
 // Add services to the container.
 IngestionRegistrator.RegisterServices(builder);
 IngestionServicesRegistrator.Register(builder);
+MigrationsServicesRegistrator.Register(builder);
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -37,5 +39,7 @@ app.UseSerilogRequestLogging();
 app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
+
+await app.PerformDataMigration().ConfigureAwait(false);
 
 app.Run();

@@ -19,12 +19,23 @@
     <ItemGroup>
       <PackageReference Include="Microsoft.Extensions.Configuration" Version="6.0.1" />
       <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="6.0.0" />
+      <PackageReference Include="RedLock.net" Version="2.3.2" />
       <PackageReference Include="StackExchange.Redis" Version="2.6.48" />
     </ItemGroup>
 
     <ItemGroup>
       <None Remove="DataMigration\Migration001 - AddSentimentField.py" />
-      <EmbeddedResource Include="DataMigration\Migration001 - AddSentimentField.py" />
+      <Content Include="DataMigration\Migration001 - AddSentimentField.py">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="DataMigration\Migration002 - AddSentimentConfidenceField.py" />
+      <Content Include="DataMigration\Migration002 - AddSentimentConfidenceField.py">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="DataMigration\Migration003 - DeleteSentimentConfidenceField.py" />
+      <Content Include="DataMigration\Migration003 - DeleteSentimentConfidenceField.py">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
     </ItemGroup>
 
 </Project>

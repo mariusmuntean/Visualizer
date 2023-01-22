@@ -40,6 +40,6 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
 
-await app.PerformDataMigration().ConfigureAwait(false);
+await app.PerformDataMigration();
 
 app.Run();

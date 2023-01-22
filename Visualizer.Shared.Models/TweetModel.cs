@@ -1,4 +1,5 @@
-﻿using Redis.OM.Modeling;
+﻿using System.Text.Json.Serialization;
+using Redis.OM.Modeling;
 
 namespace Visualizer.Shared.Models;
 
@@ -92,4 +93,8 @@ public class TweetModel
     /// </summary>
     [Indexed(CascadeDepth = 1)]
     public ReferencedTweet[] ReferencedTweets { get; set; }
+
+    [Indexed]
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public TweetSentiment Sentiment { get; set; }
 }
